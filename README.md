@@ -23,9 +23,58 @@
 
 ## Database Tables
 
-- Table `users` - contains xx yy zz
-- Table `something` - contains ww qq ss
-- ...
+### Table `utenti`
+- **userId**: chiave primaria auto-incrementale
+- **username**: univoco, viene utilizzato per fare il login
+- **salt**: utilizzato per l'hashing della password
+- **hash**: password hashata con salt
+- **createdAt**: timestamp di registrazione
+
+Contiene le informazioni degli utenti registrati che possono giocare partite complete e vedere la cronologia.
+
+### Table `carte`
+- **cardId**: chiave primaria auto-incrementale
+- **name**: nome della situazione orribile (univoco)
+- **description**: descrizione breve della situazione
+- **imageUrl**: URL dell'immagine rappresentativa
+- **misfortuneIndex**: indice di sfortuna da 1 a 100 (univoco, DECIMAL per supportare .5)
+
+Contiene tutte le 50+ carte delle situazioni orribili con i loro dettagli e indici di sfortuna univoci.
+
+### Table `partite`
+- **gameId**: chiave primaria auto-incrementale
+- **userId**: foreign key che referenzia userId della tabella users
+- **status**: può essere "in_progress", "won", "lost"
+- **createdAt**: timestamp di inizio partita
+- **totalCardsWon**: numero di carte vinte nella partita
+
+Traccia ogni partita giocata dagli utenti registrati con il suo stato e statistiche finali.
+
+### Table `rounds`
+- **roundId**: chiave primaria auto-incrementale
+- **gameId**: foreign key che referenzia gameId della tabella games
+- **cardId**: foreign key che referenzia cardId della tabella cards
+- **roundNumber**: numero progressivo del round nella partita
+- **isWon**: boolean che indica se il round è stato vinto
+- **playedAt**: timestamp del round
+
+Registra ogni singolo round di una partita, quale carta è stata presentata e se è stata vinta o persa.
+
+### Table `carte_del_gioco`
+- **gameId**: foreign key che referenzia gameId della tabella games
+- **cardId**: foreign key che referenzia cardId della tabella cards
+- **position**: posizione della carta (0-5 per le carte possedute)
+- **acquiredInRound**: numero del round in cui è stata acquisita (NULL per le 3 iniziali)
+
+Gestisce le carte possedute dal giocatore in ogni partita, incluse le 3 iniziali e quelle vinte nei round.
+
+## Relazioni
+
+- **users** (1) → (N) **games**: Un utente può giocare molte partite
+- **games** (1) → (N) **game_rounds**: Una partita ha molti round
+- **games** (1) → (N) **game_cards**: Una partita ha da 3 a 6 carte possedute
+- **cards** (1) → (N) **game_rounds**: Una carta può apparire in molti round (di partite diverse)
+- **cards** (1) → (N) **game_cards**: Una carta può essere posseduta in molte partite
 
 ## Main React Components
 
