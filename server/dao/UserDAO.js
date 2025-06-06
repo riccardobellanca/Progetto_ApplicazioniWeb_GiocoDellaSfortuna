@@ -13,11 +13,10 @@ export async function createUser(username, password) {
         "INSERT INTO utenti (username, salt, hash, createdAt) VALUES (?, ?, ?, ?)";
       db.run(sql, [username, salt, hash, createdAt], function (error) {
         if (error) return reject(error);
-        else if (rows === undefined) reject("Impossibile salvare l'utente");
         resolve({
           success: true,
           userId: this.lastID,
-          username: this.username,
+          username: username,
         });
       });
     } catch (error) {
@@ -26,29 +25,26 @@ export async function createUser(username, password) {
   });
 }
 
-export async function getUserByCredentials(email, password) {
+export async function getUserByCredentials(username, password) {
   return new Promise((resolve, reject) => {
-    const sql = "SELECT * FROM utenti WHERE email = ?";
-    db.get(sql, [email], (err, row) => {
-      if (err) {
-        reject(err);
-      } else if (row === undefined) {
-        resolve("Impossibile trovare l'utente desiderato");
-      } else {
-        const user = { id: row.id, username: row.email };
-        const salt = row.salt;
-        crypto.scrypt(password, salt, 32, (err, hashedPassword) => {
-          if (err) reject(err);
-          if (
-            !crypto.timingSafeEqual(
-              Buffer.from(row.password, "hex"),
-              hashedPassword
-            )
-          )
-            resolve("La combinazione username-password non è corretta");
-          else resolve(user);
-        });
-      }
+    const sql = "SELECT * FROM utenti WHERE username = ?";
+    db.get(sql, [username], (err, row) => {
+      if (err) return reject(err);
+      if (!row) return resolve(null);
+
+      const hashFromDB = row.hash;
+      const salt = row.salt;
+      const hashBuffer = Buffer.from(hashFromDB, "hex");
+
+      crypto.pbkdf2(password, salt, 10000, 64, "sha512", (err, derivedKey) => {
+        if (err) return reject(err);
+
+        if (!crypto.timingSafeEqual(hashBuffer, derivedKey))
+          return resolve(null);
+
+        const user = { id: row.id, username: row.username };
+        resolve(user);
+      });
     });
   });
 }

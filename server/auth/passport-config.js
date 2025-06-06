@@ -1,14 +1,11 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import UserDAO from '../dao/UserDAO.js';
-import {getUserByCredentials} from UserDAO;
-
-const userDao = new UserDAO();
+import { getUserByCredentials } from '../dao/UserDAO';
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
-    const member = await getUserByCredentials(username, password);
-    if (!member) return cb(null, false, 'Incorrect username or password');
-    return cb(null, member);
+    const user = await getUserByCredentials(username, password);
+    if (!user) return cb(null, false, 'Incorrect username or password');
+    return cb(null, user);
 }));
 
 passport.serializeUser(function (user, cb) {

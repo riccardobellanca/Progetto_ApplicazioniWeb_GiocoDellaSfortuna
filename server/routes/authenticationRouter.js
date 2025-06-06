@@ -31,6 +31,7 @@ app.post("/login", (req, res, next) => {
       return res.status(401).json({ error: info?.message || "Impossibile effettuare il login" });
     req.login(user, (err) => {
       if (err) return next(err);
+      console.log("Login req response : " + JSON.stringify(req,null,2));
       return res.status(200).json(req.user);
     });
   })(req, res, next);
