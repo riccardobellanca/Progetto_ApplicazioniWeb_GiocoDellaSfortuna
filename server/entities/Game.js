@@ -1,10 +1,10 @@
 export class Game {
-  constructor(gameId, userId, status, startedAt, completedAt, totalCardsWon) {
+  constructor(gameId, userId, status, startedAt, totalCardsWon, totalCardsLost) {
     this.gameId = gameId;
     this.userId = userId;
     this.status = status;
     this.startedAt = startedAt;
-    this.completedAt = completedAt;
     this.totalCardsWon = totalCardsWon;
+    this.totalCardsLost = totalCardsLost;
   }
 }

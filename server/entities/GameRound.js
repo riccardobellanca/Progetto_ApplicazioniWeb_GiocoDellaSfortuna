@@ -5,6 +5,5 @@ export class GameRound {
     this.cardId = cardId;
     this.roundNumber = roundNumber;
     this.isWon = isWon;
-    this.playedAt = playedAt;
   }
 }

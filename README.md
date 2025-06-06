@@ -47,6 +47,7 @@ Contiene tutte le 50+ carte delle situazioni orribili con i loro dettagli e indi
 - **status**: può essere "in_progress", "won", "lost"
 - **createdAt**: timestamp di inizio partita
 - **totalCardsWon**: numero di carte vinte nella partita
+- **totalCardsLost**: numero di carte perse nella partita
 
 Traccia ogni partita giocata dagli utenti registrati con il suo stato e statistiche finali.
 
@@ -70,11 +71,11 @@ Gestisce le carte possedute dal giocatore in ogni partita, incluse le 3 iniziali
 
 ## Relazioni
 
-- **users** (1) → (N) **games**: Un utente può giocare molte partite
-- **games** (1) → (N) **game_rounds**: Una partita ha molti round
-- **games** (1) → (N) **game_cards**: Una partita ha da 3 a 6 carte possedute
-- **cards** (1) → (N) **game_rounds**: Una carta può apparire in molti round (di partite diverse)
-- **cards** (1) → (N) **game_cards**: Una carta può essere posseduta in molte partite
+- **utenti** (1) → (N) **partite**: Un utente può giocare molte partite
+- **partite** (1) → (N) **rounds**: Una partita ha molti round
+- **partite** (1) → (N) **carte_del_gioco**: Una partita ha da 3 a 6 carte possedute
+- **carte** (1) → (N) **rounds**: Una carta può apparire in molti round (di partite diverse)
+- **carte** (1) → (N) **carte_del_gioco**: Una carta può essere posseduta in molte partite
 
 ## Main React Components
 
