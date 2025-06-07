@@ -1,5 +1,5 @@
 import db from "../db/database.js";
-import { getGameCards } from "./CardPlayedDAO.js";
+import { getAllCardsByGameId } from "./GameCardDAO.js";
 
 /**
 * Ottiene tutte le carte
@@ -33,7 +33,7 @@ export async function getCardByCardId(cardId) {
 export async function getNextCard(gameId) {
  try {
    const allCards = await getAllCards();
-   const usedCards = await getGameCards(gameId);
+   const usedCards = await getAllCardsByGameId(gameId);
    const usedIds = usedCards.map(card => card.cardId);
    
    const availableCards = allCards.filter(

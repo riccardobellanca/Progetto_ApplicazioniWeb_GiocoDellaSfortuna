@@ -6,6 +6,7 @@ export const CONFIG = {
   AUTH_ROUTES: "/auth",
   GAME_ROUTES: "/game",
   DEMO_ROUTES: "/demo",
+  PROFILE_ROUTES: "/profile"
 
 
 };

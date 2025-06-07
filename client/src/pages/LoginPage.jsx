@@ -1,25 +1,19 @@
-import React, { useState } from "react";
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Form,
-  Button,
-  Alert,
-} from "react-bootstrap";
+import { useState } from "react";
+import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import NavBar from "../components/NavBar";
+import { NavBar } from "../components/NavBar";
 import { useUser } from "../contexts/UserContext";
+import { API } from "../API.mjs";
+import { checkInput } from "../service/loginService";
+import { useToast } from "../contexts/ToastContext";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
     username: "",
     password: "",
   });
-  const [error, setError] = useState("");
+  const { showSuccess, showError } = useToast();
   const { login } = useUser();
-  const BASE_URL = "";
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -31,44 +25,16 @@ function LoginPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError("");
-
-    // Trim degli spazi
-    const trimmedData = {
-      username: formData.username.trim(),
-      password: formData.password.trim(),
-    };
-
-    // Validazioni
-    if (!trimmedData.username || !trimmedData.password) {
-      setError("Tutti i campi sono obbligatori");
-      return;
-    }
-    if (trimmedData.username.length < 4) {
-      setError("Username deve avere almeno 3 caratteri");
-      return;
-    }
-    if (trimmedData.password.length < 6) {
-      setError("Password deve avere almeno 6 caratteri");
-      return;
-    }
-    // Validazione username (solo lettere, numeri e underscore)
-    if (!/^[a-zA-Z0-9_]+$/.test(trimmedData.username)) {
-      setError("Username può contenere solo lettere, numeri e underscore");
-      return;
-    }
-
-     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
-      const userData = await res.json();
+    const { username, password } = formData;
+    if (checkInput(username, password, showError) === true) {
+      const userData = await API.login(
+        username,
+        password,
+        showSuccess,
+        showError
+      );
       login(userData);
-      navigate("/"); 
-    } catch (err) {
-      setError(err.message);
+      navigate("/");
     }
   };
   return (
@@ -84,8 +50,6 @@ function LoginPage() {
                   <h2 style={{ color: "#8b5cf6" }}>🎯 Stuff Happens</h2>
                   <p className="text-muted">Accedi al tuo account</p>
                 </div>
-
-                {error && <Alert variant="danger">{error}</Alert>}
 
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3">

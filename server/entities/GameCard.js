@@ -1,4 +1,4 @@
-export class CardPlayed {
+export class GameCard {
   constructor(gameId, cardId, acquiredInRound) {
     this.gameId = gameId;
     this.cardId = cardId;

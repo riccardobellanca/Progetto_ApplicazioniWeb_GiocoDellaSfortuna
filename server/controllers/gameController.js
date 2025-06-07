@@ -1,7 +1,7 @@
 import * as gameDAO from "../dao/GameDAO.js";
 import * as cardDAO from "../dao/CardDAO.js";
 import * as roundDAO from "../dao/RoundDAO.js";
-import * as cardPlayedDAO from "../dao/CardPlayedDAO.js";
+import * as cardPlayedDAO from "../dao/GameCardDAO.js";
 
 export const createGame = async (req) => {
   try {
@@ -66,11 +66,6 @@ export const submitGuess = async (req) => {
     return { success: false, error: error.message };
   }
 };
-
-import * as gameDAO from "../dao/GameDAO.js";
-import * as cardDAO from "../dao/CardDAO.js";
-import * as roundDAO from "../dao/RoundDAO.js";
-import * as cardPlayedDAO from "../dao/CardPlayedDAO.js";
 
 export const startNewGame = async (userId) => {
   const game = await gameDAO.saveGame(userId);

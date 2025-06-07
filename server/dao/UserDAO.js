@@ -41,3 +41,18 @@ export async function getUserByCredentials(username, password) {
    });
  });
 }
+
+/**
+* Verifica credenziali utente
+*/
+export async function getCurrentUser() {
+ return new Promise((resolve, reject) => {
+   const sql = "SELECT userId,username,createdAt FROM utenti WHERE username = ?";
+   
+   db.get(sql, [sessionStorage.userId], (err, row) => {
+     if (err) return reject(err);
+     if (!row) return resolve(null);     
+     resolve({ id: row.userId, username: row.username, createdAt : row.createdAt });
+   });
+ });
+}

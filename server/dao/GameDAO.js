@@ -1,46 +1,62 @@
 import db from "../db/database.js";
 
 /**
-* Crea nuova partita
-*/
+ * Crea nuova partita
+ */
 export async function saveGame(userId) {
- return new Promise((resolve, reject) => {
-   const sql = `
+  return new Promise((resolve, reject) => {
+    const sql = `
      INSERT INTO partite (userId, status, startedAt, totalCardsWon, totalCardsLost) 
      VALUES (?, ?, datetime('now'), ?, ?)
    `;
-   
-   db.run(sql, [userId, "in_progress", 0, 0], function(err) {
-     if (err) reject(err);
-     else {
-       resolve({
-         gameId: this.lastID,
-         userId,
-         status: "in_progress",
-         startedAt: new Date().toISOString(),
-         totalCardsWon: 0,
-         totalCardsLost: 0
-       });
-     }
-   });
- });
+
+    db.run(sql, [userId, "in_progress", 0, 0], function (err) {
+      if (err) reject(err);
+      else {
+        resolve({
+          gameId: this.lastID,
+          userId,
+          status: "in_progress",
+          startedAt: new Date().toISOString(),
+          totalCardsWon: 0,
+          totalCardsLost: 0,
+        });
+      }
+    });
+  });
 }
 
 /**
-* Aggiorna stato partita
-*/
+ * Aggiorna stato partita
+ */
 export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
- return new Promise((resolve, reject) => {
-   const sql = `
+  return new Promise((resolve, reject) => {
+    const sql = `
      UPDATE partite 
      SET status = ?, totalCardsWon = ?, totalCardsLost = ?, completedAt = datetime('now')
      WHERE gameId = ?
    `;
-   
-   db.run(sql, [status, cardsWon, cardsLost, gameId], function(err) {
-     if (err) reject(err);
-     else if (this.changes === 0) reject("Partita non trovata");
-     else resolve({ gameId, status, cardsWon, cardsLost });
-   });
- });
+
+    db.run(sql, [status, cardsWon, cardsLost, gameId], function (err) {
+      if (err) reject(err);
+      else if (this.changes === 0) reject("Partita non trovata");
+      else resolve({ gameId, status, cardsWon, cardsLost });
+    });
+  });
+}
+
+/**
+ * Cerca tutte le partite giocate da un utente
+ */
+export async function getAllGamesCurrentUser() {
+  return new Promise((resolve, reject) => {
+    const sql = `
+     SELECT * FROM partite WHERE userId = ? AND (status = "won" OR status = "lost")
+   `;
+
+    db.all(sql, [sessionStorage.userId], (err, rows) => {
+      if (err) reject(err);
+      else resolve(rows || []);
+    });
+  });
 }
