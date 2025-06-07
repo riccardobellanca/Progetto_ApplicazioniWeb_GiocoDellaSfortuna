@@ -1,30 +1,46 @@
 import db from "../db/database.js";
 
-export function saveGame(
-  gameId,
-  userId,
-  status,
-  startedAt,
-  totalCardsWon,
-  totalCardsLost
-) {
-  return new Promise((resolve, reject) => {
-    try {
-      const sql =
-        "INSERT INTO partite (userId, status, startedAt, totalCardsWon, totalCardLost) VALUES (?, ?, ?, ?, ?)";
-      db.run(
-        sql,
-        [gameId, userId, status, startedAt, totalCardsWon, totalCardsLost],
-        (err, rows) => {
-          if (err) reject(err);
-          else if (rows === undefined) reject("Impossibile salvare la partita");
-          else resolve("Partita salvata con successo");
-        }
-      );
-    } catch (error) {
-      reject(error);
-    }
-  });
+/**
+* Crea nuova partita
+*/
+export async function saveGame(userId) {
+ return new Promise((resolve, reject) => {
+   const sql = `
+     INSERT INTO partite (userId, status, startedAt, totalCardsWon, totalCardsLost) 
+     VALUES (?, ?, datetime('now'), ?, ?)
+   `;
+   
+   db.run(sql, [userId, "in_progress", 0, 0], function(err) {
+     if (err) reject(err);
+     else {
+       resolve({
+         gameId: this.lastID,
+         userId,
+         status: "in_progress",
+         startedAt: new Date().toISOString(),
+         totalCardsWon: 0,
+         totalCardsLost: 0
+       });
+     }
+   });
+ });
 }
 
-export function getAllUserGames(userId) {}
+/**
+* Aggiorna stato partita
+*/
+export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
+ return new Promise((resolve, reject) => {
+   const sql = `
+     UPDATE partite 
+     SET status = ?, totalCardsWon = ?, totalCardsLost = ?, completedAt = datetime('now')
+     WHERE gameId = ?
+   `;
+   
+   db.run(sql, [status, cardsWon, cardsLost, gameId], function(err) {
+     if (err) reject(err);
+     else if (this.changes === 0) reject("Partita non trovata");
+     else resolve({ gameId, status, cardsWon, cardsLost });
+   });
+ });
+}

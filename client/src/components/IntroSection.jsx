@@ -1,8 +1,10 @@
-import React from 'react';
-import { Container, Button } from 'react-bootstrap';
+import { Button, Container } from 'react-bootstrap';
 import { Link } from 'react-router-dom';
+import { useUser } from '../contexts/UserContext';
 
-function HeroSection() {
+function IntroSection() {
+  const { user } = useUser();
+
   return (
     <div style={{ backgroundColor: '#f8f5ff', minHeight: '500px', display: 'flex', alignItems: 'center' }}>
       <Container className="py-5">
@@ -15,21 +17,47 @@ function HeroSection() {
             universitaria! Colleziona 6 carte per vincere, ma attento a non fare 3 errori!
           </p>
           <div className="d-flex gap-3 justify-content-center">
-            <Button 
-              as={Link}
-              to="/auth/login"
-              size="lg"
-              style={{ backgroundColor: '#8b5cf6', border: 'none' }}
-            >
-              ▶ Registrati e Gioca
-            </Button>
-            <Button 
-              variant="outline-primary"
-              size="lg"
-              style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}
-            >
-              Prova Demo
-            </Button>
+            {user ? (
+              <>
+                <Button 
+                  as={Link}
+                  to="/game"
+                  size="lg"
+                  style={{ backgroundColor: '#8b5cf6', border: 'none' }}
+                >
+                  ▶ Nuova Partita
+                </Button>
+                <Button 
+                  as={Link}
+                  to="/profile/:userId"
+                  variant="outline-primary"
+                  size="lg"
+                  style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}
+                >
+                  Profilo
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button 
+                  as={Link}
+                  to="/auth/login"
+                  size="lg"
+                  style={{ backgroundColor: '#8b5cf6', border: 'none' }}
+                >
+                  ▶ Registrati e Gioca
+                </Button>
+                <Button 
+                  as={Link}
+                  to="/demo"
+                  variant="outline-primary"
+                  size="lg"
+                  style={{ borderColor: '#8b5cf6', color: '#8b5cf6' }}
+                >
+                  Prova Demo
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </Container>
@@ -37,4 +65,4 @@ function HeroSection() {
   );
 }
 
-export default HeroSection;
+export default IntroSection;

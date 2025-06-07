@@ -1,31 +1,50 @@
 import db from "../db/database.js";
+import { getGameCards } from "./CardPlayedDAO.js";
 
+/**
+* Ottiene tutte le carte
+*/
 export async function getAllCards() {
-    return new Promise((resolve,reject) => {
-        try {
-            const sql = "SELECT cardId, name, description, imageURL FROM carte";
-            db.all(sql, [], (error, rows) => {
-                if (error) reject(error);
-                else if (rows === undefined) reject("Impossibile trovare le carte");
-                else resolve(rows);
-            });
-        } catch (error) {
-            reject(error);
-        }
-    })
+ return new Promise((resolve, reject) => {
+   const sql = "SELECT * FROM carte";
+   db.all(sql, [], (error, rows) => {
+     if (error) reject(error);
+     else resolve(rows || []);
+   });
+ });
 }
 
-export async function getCardById(cardId) {
-    return new Promise((resolve,reject) => {
-        try {
-            const sql = "SELECT * FROM carte WHERE cardId = ?";
-            db.all(sql, [cardId], (err,rows) => {
-                if (err) reject(err);
-                else if (rows === undefined) reject("Impossibile trovare la carta desiderata");
-                else resolve(rows);
-            });
-        } catch (error) {
-            reject(error);
-        }
-    });
+/**
+* Ottiene carta per ID
+*/
+export async function getCardByCardId(cardId) {
+ return new Promise((resolve, reject) => {
+   const sql = "SELECT * FROM carte WHERE cardId = ?";
+   db.get(sql, [cardId], (err, row) => {
+     if (err) reject(err);
+     else resolve(row || null);
+   });
+ });
+}
+
+/**
+* Ottiene prossima carta random non usata
+*/
+export async function getNextCard(gameId) {
+ try {
+   const allCards = await getAllCards();
+   const usedCards = await getGameCards(gameId);
+   const usedIds = usedCards.map(card => card.cardId);
+   
+   const availableCards = allCards.filter(
+     card => !usedIds.includes(card.cardId)
+   );
+   
+   if (availableCards.length === 0) return null;
+   
+   const randomIndex = Math.floor(Math.random() * availableCards.length);
+   return availableCards[randomIndex];
+ } catch (error) {
+   throw error;
+ }
 }

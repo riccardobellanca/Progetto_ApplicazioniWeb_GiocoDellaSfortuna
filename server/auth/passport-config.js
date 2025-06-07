@@ -1,6 +1,6 @@
 import passport from 'passport';
 import { Strategy as LocalStrategy } from 'passport-local';
-import { getUserByCredentials } from '../dao/UserDAO';
+import { getUserByCredentials } from '../dao/UserDAO.js';
 
 passport.use(new LocalStrategy(async function verify(username, password, cb) {
     const user = await getUserByCredentials(username, password);

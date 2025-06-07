@@ -56,7 +56,7 @@ Traccia ogni partita giocata dagli utenti registrati con il suo stato e statisti
 - **gameId**: foreign key che referenzia gameId della tabella games
 - **cardId**: foreign key che referenzia cardId della tabella cards
 - **roundNumber**: numero progressivo del round nella partita
-- **isWon**: boolean che indica se il round è stato vinto
+- **isWon**: boolean che indica se il round è staVto vinto
 - **playedAt**: timestamp del round
 
 Registra ogni singolo round di una partita, quale carta è stata presentata e se è stata vinta o persa.
@@ -64,7 +64,6 @@ Registra ogni singolo round di una partita, quale carta è stata presentata e se
 ### Table `carte_del_gioco`
 - **gameId**: foreign key che referenzia gameId della tabella games
 - **cardId**: foreign key che referenzia cardId della tabella cards
-- **position**: posizione della carta (0-5 per le carte possedute)
 - **acquiredInRound**: numero del round in cui è stata acquisita (NULL per le 3 iniziali)
 
 Gestisce le carte possedute dal giocatore in ogni partita, incluse le 3 iniziali e quelle vinte nei round.

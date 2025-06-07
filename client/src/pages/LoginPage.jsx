@@ -1,51 +1,87 @@
-import React, { useState } from 'react';
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
-import NavBar from '../components/NavBar';
+import React, { useState } from "react";
+import {
+  Container,
+  Row,
+  Col,
+  Card,
+  Form,
+  Button,
+  Alert,
+} from "react-bootstrap";
+import { Link, useNavigate } from "react-router-dom";
+import NavBar from "../components/NavBar";
+import { useUser } from "../contexts/UserContext";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
-    username: '',
-    password: ''
+    username: "",
+    password: "",
   });
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
+  const { login } = useUser();
+  const BASE_URL = "";
   const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
+    setError("");
 
-    if (!formData.username || !formData.password) {
-      setError('Compila tutti i campi');
+    // Trim degli spazi
+    const trimmedData = {
+      username: formData.username.trim(),
+      password: formData.password.trim(),
+    };
+
+    // Validazioni
+    if (!trimmedData.username || !trimmedData.password) {
+      setError("Tutti i campi sono obbligatori");
+      return;
+    }
+    if (trimmedData.username.length < 4) {
+      setError("Username deve avere almeno 3 caratteri");
+      return;
+    }
+    if (trimmedData.password.length < 6) {
+      setError("Password deve avere almeno 6 caratteri");
+      return;
+    }
+    // Validazione username (solo lettere, numeri e underscore)
+    if (!/^[a-zA-Z0-9_]+$/.test(trimmedData.username)) {
+      setError("Username può contenere solo lettere, numeri e underscore");
       return;
     }
 
-    // Qui andrebbe la chiamata API per login
-    console.log('Login', formData);
-    
-    // Per ora simulo il successo
-    alert('Login effettuato!');
-    navigate('/');
+     try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
+      const userData = await res.json();
+      login(userData);
+      navigate("/"); 
+    } catch (err) {
+      setError(err.message);
+    }
   };
-
   return (
     <>
       <NavBar />
-      
+
       <Container className="py-5">
         <Row className="justify-content-center">
           <Col md={6} lg={5}>
             <Card className="shadow-sm">
               <Card.Body className="p-4">
                 <div className="text-center mb-4">
-                  <h2 style={{ color: '#8b5cf6' }}>🎯 Stuff Happens</h2>
+                  <h2 style={{ color: "#8b5cf6" }}>🎯 Stuff Happens</h2>
                   <p className="text-muted">Accedi al tuo account</p>
                 </div>
 
@@ -76,10 +112,10 @@ function LoginPage() {
                     />
                   </Form.Group>
 
-                  <Button 
-                    type="submit" 
+                  <Button
+                    type="submit"
                     className="w-100 mb-3"
-                    style={{ backgroundColor: '#8b5cf6', border: 'none' }}
+                    style={{ backgroundColor: "#8b5cf6", border: "none" }}
                   >
                     Accedi
                   </Button>
@@ -87,8 +123,8 @@ function LoginPage() {
 
                 <div className="text-center">
                   <p className="mb-0">
-                    Non hai un account?{' '}
-                    <Link to="/auth/register" style={{ color: '#8b5cf6' }}>
+                    Non hai un account?{" "}
+                    <Link to="/auth/register" style={{ color: "#8b5cf6" }}>
                       Registrati
                     </Link>
                   </p>

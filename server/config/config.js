@@ -4,6 +4,8 @@ export const CONFIG = {
   APP_V1_BASE_URL: `http://localhost:5000`,
   REACT_SERVER_BASE_URL: `http://localhost:5173`,
   AUTH_ROUTES: "/auth",
-  USER_ROUTES: "/user",
+  GAME_ROUTES: "/game",
+  DEMO_ROUTES: "/demo",
+
 
 };

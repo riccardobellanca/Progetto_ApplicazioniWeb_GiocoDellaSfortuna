@@ -4,7 +4,7 @@ import passport from "../auth/passport-config.js";
 
 const router = Router();
 
-app.post("/register", async (req, res, next) => {
+router.post("/register", async (req, res, next) => {
   const { username, password } = req.body;
   if (!username || !password)
     return res.status(400).json({ error: "Username e/o Password richiesti per la registrazione" });
@@ -24,20 +24,19 @@ app.post("/register", async (req, res, next) => {
   }
 });
 
-app.post("/login", (req, res, next) => {
+router.post("/login", (req, res, next) => {
   passport.authenticate("local", (err, user, info) => {
     if (err) return next(err);
     if (!user)
       return res.status(401).json({ error: info?.message || "Impossibile effettuare il login" });
     req.login(user, (err) => {
       if (err) return next(err);
-      console.log("Login req response : " + JSON.stringify(req,null,2));
       return res.status(200).json(req.user);
     });
   })(req, res, next);
 });
 
-app.delete("/logout", (req, res) => {
+router.delete("/logout", (req, res) => {
   req.logout(() => {
     res.end();
   });
