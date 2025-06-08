@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Container, Row, Col, Card, Form, Button } from "react-bootstrap";
 import { Link, useNavigate } from "react-router-dom";
-import { NavBar } from "../components/NavBar";
+import NavBar from "../components/NavBar";
 import { useUser } from "../contexts/UserContext";
 import { API } from "../API.mjs";
 import { checkInput } from "../service/loginService";
@@ -26,15 +26,17 @@ function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const { username, password } = formData;
-    if (checkInput(username, password, showError) === true) {
+    try {
+      checkInput(username, password);
       const userData = await API.login(
         username,
         password,
-        showSuccess,
-        showError
       );
       login(userData);
       navigate("/");
+      showSuccess("Login effettuato con successo");
+    } catch (error) {
+      showError(error.message);
     }
   };
   return (
@@ -60,7 +62,6 @@ function LoginPage() {
                       value={formData.username}
                       onChange={handleChange}
                       placeholder="Inserisci username"
-                      required
                     />
                   </Form.Group>
 
@@ -72,7 +73,6 @@ function LoginPage() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Inserisci password"
-                      required
                     />
                   </Form.Group>
 

@@ -22,48 +22,64 @@ const Toast = ({ id, type, title, message, onRemove }) => {
   const isSuccess = type === 'success';
   
   return (
-    <div 
-      className={`
-        fixed bottom-6 right-6 p-4 rounded-lg shadow-lg 
-        flex items-center gap-3 min-w-80 max-w-96
-        transform transition-all duration-300 ease-out
-        ${isSuccess ? 'bg-green-500' : 'bg-red-500'} text-white
-      `}
-      style={{ 
-        zIndex: 1000,
-        animation: 'slideIn 0.3s ease-out'
-      }}
-    >
-      {isSuccess ? (
-        <CheckCircle className="w-6 h-6 flex-shrink-0" />
-      ) : (
-        <XCircle className="w-6 h-6 flex-shrink-0" />
-      )}
-      
-      <div className="flex-grow">
-        <div className="font-semibold text-sm mb-1">{title}</div>
-        <div className="text-sm opacity-90">{message}</div>
+    <>
+      <div 
+        className={`
+          toast-notification
+          position-fixed bottom-0 end-0 p-4 rounded shadow-lg
+          d-flex align-items-center gap-3
+          ${isSuccess ? 'bg-success' : 'bg-danger'} text-white
+        `}
+        style={{ 
+          zIndex: 1050,
+          minWidth: '320px',
+          maxWidth: '400px',
+          margin: '1rem'
+        }}
+      >
+        {isSuccess ? (
+          <CheckCircle className="flex-shrink-0" size={24} />
+        ) : (
+          <XCircle className="flex-shrink-0" size={24} />
+        )}
+        
+        <div className="flex-grow-1">
+          <div className="fw-semibold small mb-1">{title}</div>
+          <div className="small opacity-75">{message}</div>
+        </div>
       </div>
       
-      <style jsx>{`
-        @keyframes slideIn {
-          from { transform: translateX(100%); opacity: 0; }
-          to { transform: translateX(0); opacity: 1; }
-        }
-      `}</style>
-    </div>
+      <style dangerouslySetInnerHTML={{
+        __html: `
+          @keyframes slideInRight {
+            from { 
+              transform: translateX(100%); 
+              opacity: 0; 
+            }
+            to { 
+              transform: translateX(0); 
+              opacity: 1; 
+            }
+          }
+          
+          .toast-notification {
+            animation: slideInRight 0.3s ease-out;
+          }
+        `
+      }} />
+    </>
   );
 };
 
-export const ToastProvider = ({ children }) => {
+const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
-  const showSuccess = (message) => {
-    setToast({ id: Date.now(), type: 'success', title: 'Successo', message });
+  const showSuccess = (message = '') => {
+    setToast({ id: Date.now(), type: 'success', title : "Successo", message });
   };
 
-  const showError = (message) => {
-    setToast({ id: Date.now(), type: 'error', title: 'Errore', message });
+  const showError = (message = '') => {
+    setToast({ id: Date.now(), type: 'error', title : "Errore", message });
   };
 
   return (
@@ -75,3 +91,5 @@ export const ToastProvider = ({ children }) => {
     </ToastContext.Provider>
   );
 };
+
+export default ToastProvider;

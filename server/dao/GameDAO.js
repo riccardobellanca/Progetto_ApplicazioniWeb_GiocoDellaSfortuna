@@ -11,7 +11,7 @@ export async function saveGame(userId) {
    `;
 
     db.run(sql, [userId, "in_progress", 0, 0], function (err) {
-      if (err) reject(err);
+      if (err) reject({code : 500, message : "Impossibile creare la partita"});
       else {
         resolve({
           gameId: this.lastID,
@@ -38,7 +38,7 @@ export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
    `;
 
     db.run(sql, [status, cardsWon, cardsLost, gameId], function (err) {
-      if (err) reject(err);
+      if (err) reject({code : 500, message : "Impossibile aggiornare la partita"});
       else if (this.changes === 0) reject("Partita non trovata");
       else resolve({ gameId, status, cardsWon, cardsLost });
     });
@@ -55,7 +55,7 @@ export async function getAllGamesCurrentUser() {
    `;
 
     db.all(sql, [sessionStorage.userId], (err, rows) => {
-      if (err) reject(err);
+      if (err) reject({code : 500, message : "Impossibile trovare tutte le partite del giocatore corrente"});
       else resolve(rows || []);
     });
   });

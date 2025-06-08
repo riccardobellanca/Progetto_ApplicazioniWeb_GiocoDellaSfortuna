@@ -2,6 +2,10 @@ import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
+import { checkInput } from '../service/registerService';
+import { useUser } from '../contexts/UserContext';
+import { useToast } from '../contexts/ToastContext';
+import { API } from '../API.mjs';
 
 function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -9,8 +13,9 @@ function RegisterPage() {
     password: '',
     confirmPassword: ''
   });
-  const [error, setError] = useState('');
   const navigate = useNavigate();
+  const { login } = useUser();
+  const { showSuccess, showError } = useToast();
 
   const handleChange = (e) => {
     setFormData({
@@ -19,32 +24,22 @@ function RegisterPage() {
     });
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setError('');
-
-    if (!formData.username || !formData.password || !formData.confirmPassword) {
-      setError('Compila tutti i campi');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      setError('Le password non coincidono');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      setError('La password deve essere almeno 6 caratteri');
-      return;
-    }
-
-    // Qui andrebbe la chiamata API per registrazione
-    console.log('Registrazione', formData);
-    
-    // Per ora simulo il successo
-    alert('Registrazione completata! Ora puoi accedere.');
-    navigate('/auth/login');
-  };
+  const handleSubmit = async (e) => {
+      e.preventDefault();
+      const { username, password, confirmPassword } = formData;
+      try {
+        checkInput(username, password, confirmPassword);
+        const userData = await API.register(
+          username,
+          password,
+        );
+        login(userData);
+        navigate("/");
+        showSuccess("Registrazione effettuata con successo");
+      } catch (error) {
+        showError(error.message);
+      }
+    };
 
   return (
     <>
@@ -60,8 +55,6 @@ function RegisterPage() {
                   <p className="text-muted">Crea un nuovo account</p>
                 </div>
 
-                {error && <Alert variant="danger">{error}</Alert>}
-
                 <Form onSubmit={handleSubmit}>
                   <Form.Group className="mb-3">
                     <Form.Label>Username</Form.Label>
@@ -71,7 +64,6 @@ function RegisterPage() {
                       value={formData.username}
                       onChange={handleChange}
                       placeholder="Scegli un username"
-                      required
                     />
                   </Form.Group>
 
@@ -83,7 +75,6 @@ function RegisterPage() {
                       value={formData.password}
                       onChange={handleChange}
                       placeholder="Crea una password"
-                      required
                     />
                     <Form.Text className="text-muted">
                       Minimo 6 caratteri
@@ -98,7 +89,6 @@ function RegisterPage() {
                       value={formData.confirmPassword}
                       onChange={handleChange}
                       placeholder="Conferma la password"
-                      required
                     />
                   </Form.Group>
 

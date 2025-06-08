@@ -24,7 +24,7 @@ export const createDemo = async (req) => {
       },
     };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, data: error.message };
   }
 };
 
@@ -62,6 +62,6 @@ export const submitDemoGuess = async (req) => {
       },
     };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, data: error.message };
   }
 };

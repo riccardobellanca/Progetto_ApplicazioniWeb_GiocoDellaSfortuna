@@ -23,7 +23,7 @@ export const createGame = async (req) => {
       },
     };
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, data: error.message };
   }
 };
 
@@ -63,7 +63,7 @@ export const submitGuess = async (req) => {
       };
     }
   } catch (error) {
-    return { success: false, error: error.message };
+    return { success: false, data: error.message };
   }
 };
 

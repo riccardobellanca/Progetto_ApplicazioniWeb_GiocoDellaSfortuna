@@ -8,7 +8,7 @@ export async function getAllCards() {
  return new Promise((resolve, reject) => {
    const sql = "SELECT * FROM carte";
    db.all(sql, [], (error, rows) => {
-     if (error) reject(error);
+     if (error) reject({code : 500, message : "Impossibile trovare tutte le carte del database"});
      else resolve(rows || []);
    });
  });
@@ -21,7 +21,7 @@ export async function getCardByCardId(cardId) {
  return new Promise((resolve, reject) => {
    const sql = "SELECT * FROM carte WHERE cardId = ?";
    db.get(sql, [cardId], (err, row) => {
-     if (err) reject(err);
+     if (err) reject({code : 500, message : "Impossibile trovare la carta con questo id"});
      else resolve(row || null);
    });
  });

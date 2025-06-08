@@ -12,7 +12,7 @@ export async function saveGameCard(cardId, acquiredInRound, gameId) {
    `;
 
     db.run(sql, [gameId, cardId, gameId, acquiredInRound], function (err) {
-      if (err) reject(err);
+      if (err) reject({code : 500, message : "Impossibile salvare la carta del gioco"});
       else {
         const cardPlayed = new GameCard(gameId, cardId, acquiredInRound);
         resolve(cardPlayed);
@@ -48,8 +48,7 @@ export function getAllCardsByGameId(gameId) {
   return new Promise((resolve,reject) => {
     const sql = "SELECT * FROM carte_del_gioco WHERE gameId = ?";
     db.all(sql, [gameId], (err,rows) => {
-      if (err) reject(err);
-      else if (rows === undefined) reject(false);
+      if (err) reject({code : 500, message : "Impossibile trovare tutte le carte giocate della partite"});
       else resolve(rows || []);
     });
   });

@@ -1,12 +1,22 @@
 import { Navbar, Nav, Container, Button } from "react-bootstrap";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
+import { useToast } from "../contexts/ToastContext";
+import { API } from "../API.mjs";
 
 function NavBar() {
   const { user, logout } = useUser();
-  const handleLogout = () => {
-    logout();
-    navigate("/");
+  const { showSuccess, showError } = useToast();
+  const navigate = useNavigate();
+  const handleLogout = async () => {
+    try {
+      await API.logout();
+      logout();
+      navigate("/");
+      showSuccess("Logout effettuato con successo");
+    } catch (error) {
+      showError(error);
+    }
   };
 
   return (
@@ -29,7 +39,9 @@ function NavBar() {
               </>
             ) : (
               <>
-                <span className="me-3">Bentornato, <strong>{user.username}</strong></span>
+                <span className="me-3">
+                  Bentornato, <strong>{user.username}</strong>
+                </span>
                 <Button variant="outline-primary" onClick={handleLogout}>
                   Logout
                 </Button>

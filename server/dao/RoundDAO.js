@@ -12,7 +12,7 @@ export async function saveRound(cardId, roundNumber, isWon, gameId) {
    `;
    
    db.run(sql, [gameId, cardId, roundNumber, isWon], function(err) {
-     if (err) reject(err);
+     if (err) reject({code : 500, message : "Impossibile salvare il round"});
      else {
        const round = new Round(
          this.lastID,
@@ -24,25 +24,6 @@ export async function saveRound(cardId, roundNumber, isWon, gameId) {
        );
        resolve(round);
      }
-   });
- });
-}
-
-/**
-* Ottiene le carte possedute in una partita
-*/
-export async function getGameCards(gameId) {
- return new Promise((resolve, reject) => {
-   const sql = `
-     SELECT c.* FROM carte c
-     JOIN carte_del_gioco cg ON c.cardId = cg.cardId
-     WHERE cg.gameId = ?
-     ORDER BY cg.position
-   `;
-   
-   db.all(sql, [gameId], (err, rows) => {
-     if (err) reject(err);
-     else resolve(rows || []);
    });
  });
 }
