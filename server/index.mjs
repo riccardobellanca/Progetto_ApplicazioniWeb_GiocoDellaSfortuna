@@ -33,9 +33,9 @@ app.use(passport.authenticate("session"));
 
 // middleware
 app.use(CONFIG.AUTH_ROUTES, authenticationRouter);
+app.use(CONFIG.PROFILE_ROUTES, profileRouter);
 app.use(CONFIG.GAME_ROUTES, gameRouter);
 app.use(CONFIG.DEMO_ROUTES, demoRouter);
-app.use(CONFIG.PROFILE_ROUTES, profileRouter);
 
 // server listening...
 app.listen(port, () => {

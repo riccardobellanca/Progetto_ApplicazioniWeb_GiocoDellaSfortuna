@@ -3,10 +3,17 @@ import { getAllGamesCurrentUser } from "../dao/GameDAO.js";
 import { getAllCardsByGameId } from "../dao/GameCardDAO.js";
 import { getCardByCardId } from "../dao/CardDAO.js";
 
-export const getProfileInfo = async () => {
+export const getProfileInfo = async (req) => {
   try {
-    const user = await getCurrentUser();
-    const games = await getAllGamesCurrentUser();
+
+    console.log("user => " + JSON.stringify(req.user.userId, null, 2));
+
+    const user = await getCurrentUser(req);
+    const games = await getAllGamesCurrentUser(req);
+
+    console.log("user => " + JSON.stringify(user, null, 2));
+    console.log("games => " + JSON.stringify(games, null, 2));
+
     const gamesPlayed = games.length;
     const gamesWon = games.filter((game) => game.status === "won").length;
     const gamesLost = games.filter((game) => game.status === "lost").length;
@@ -23,14 +30,20 @@ export const getProfileInfo = async () => {
           gamesPlayed: gamesPlayed,
           gamesWon: gamesWon,
           gamesLost: gamesLost,
-          datelastGame : dateLastgame
+          datelastGame: dateLastgame,
         },
       },
     };
   } catch (error) {
     return {
       success: false,
-      data: { error },
+      data:
+        error.code !== undefined
+          ? error
+          : {
+              code: 500,
+              message: "Impossibile trovare le informazioni del profilo",
+            },
     };
   }
 };

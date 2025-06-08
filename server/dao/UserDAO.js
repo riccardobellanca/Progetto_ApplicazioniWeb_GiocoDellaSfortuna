@@ -59,14 +59,13 @@ export async function getUserByCredentials(username, password) {
 /**
  * Verifica credenziali utente
  */
-export async function getCurrentUser() {
+export async function getCurrentUser(req) {
   return new Promise((resolve, reject) => {
     const sql =
       "SELECT userId,username,createdAt FROM utenti WHERE userId = ?";
 
-    db.get(sql, [sessionStorage.userId], (err, row) => {
+    db.get(sql, [req.user.userId], (err, row) => {
       if (err) return reject({code : 500, message : "Impossibile trovare l'utente corrente"});
-      if (!row) return resolve(null);
       else
         resolve({
           id: row.userId,

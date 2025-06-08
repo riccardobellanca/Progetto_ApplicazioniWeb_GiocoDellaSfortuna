@@ -14,22 +14,4 @@ const db = new sqlite3.Database(database_path + database_name, (err) => {
   }
 });
 
-let result = [];
-
-/*
-// Visualizzazione dati tabella UTENTI
-db.all(sql, (err, rows) => {
-  if (err) {
-    console.error("Errore nella query:", err.message);
-    return;
-  }
-
-  // Stampa tutti gli utenti
-  console.log("\nTABLE utenti:");
-  rows.forEach((row, index) => {
-    console.log(`Utente ${index + 1}: ${JSON.stringify(row)}`);
-  });
-});
-*/
-
 export default db;
