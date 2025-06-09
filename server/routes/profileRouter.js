@@ -13,7 +13,7 @@ router.get("/:profileId", requireAuth, requireOwnership, async (req, res) => {
 });
 
 router.get("/:profileId/history", requireAuth, requireOwnership, async (req, res) => {
-  const response = await getProfileHistory(req);
+  const response = await getProfileHistory(req.params.profileId);
   response.success
     ? res.status(200).json(response)
     : res.status(response.data.code).json(response);

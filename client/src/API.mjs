@@ -1,11 +1,15 @@
 // API.mjs
 const SERVER_URL = "http://localhost:5000";
 
-class ApiError extends Error {
+export class ApiError extends Error {
   constructor(message, code) {
     super(message);
     this.code = code;
+    this.message = message;
   }
+  getMessage = () => {
+    return this.message.message;
+  };
 }
 
 const handleApiCall = async (url, options = {}) => {
@@ -18,7 +22,17 @@ const handleApiCall = async (url, options = {}) => {
   const responseJson = await response.json();
 
   if (!responseJson.success) {
-    //console.log("responseJson => " + JSON.stringify(responseJson,null,2));
+    console.log(
+      "responseJson => " +
+        JSON.stringify(
+          new ApiError(
+            responseJson.data?.message || "Errore API",
+            responseJson.data?.code || response.status
+          ),
+          null,
+          2
+        )
+    );
     throw new ApiError(
       responseJson.data?.message || "Errore API",
       responseJson.data?.code || response.status
@@ -51,6 +65,12 @@ export const API = {
 
   getProfileInfo: async (profileId) => {
     return handleApiCall(SERVER_URL + `/profile/${profileId}`, {
+      method: "GET",
+    });
+  },
+
+  getProfileHistory: async (profileId) => {
+    return handleApiCall(SERVER_URL + `/profile/${profileId}/history`, {
       method: "GET",
     });
   },

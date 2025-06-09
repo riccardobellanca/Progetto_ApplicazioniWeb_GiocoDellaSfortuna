@@ -27,3 +27,16 @@ export async function saveRound(cardId, roundNumber, isWon, gameId) {
    });
  });
 }
+
+/**
+ * Cerca tutte le carte incontrate durante una partita
+ */
+export function getAllRoundsByGameId(gameId) {
+  return new Promise((resolve,reject) => {
+    const sql = "SELECT * FROM rounds WHERE gameId = ?";
+    db.all(sql, [gameId], (err,rows) => {
+      if (err) reject({code : 500, message : "Impossibile trovare tutte le carte giocate della partite"});
+      else resolve(rows || []);
+    });
+  });
+}

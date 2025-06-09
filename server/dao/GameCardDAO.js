@@ -41,15 +41,3 @@ export function checkCardPosition(playerCards, newCardIndex, position) {
   );
 }
 
-/**
- * Cerca tutte le carte vinte durante una partita
- */
-export function getAllCardsByGameId(gameId) {
-  return new Promise((resolve,reject) => {
-    const sql = "SELECT * FROM carte_del_gioco WHERE gameId = ?";
-    db.all(sql, [gameId], (err,rows) => {
-      if (err) reject({code : 500, message : "Impossibile trovare tutte le carte giocate della partite"});
-      else resolve(rows || []);
-    });
-  });
-}

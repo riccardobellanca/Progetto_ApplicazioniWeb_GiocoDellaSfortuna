@@ -1,5 +1,4 @@
 import db from "../db/database.js";
-import { getAllCardsByGameId } from "./GameCardDAO.js";
 
 /**
 * Ottiene tutte le carte

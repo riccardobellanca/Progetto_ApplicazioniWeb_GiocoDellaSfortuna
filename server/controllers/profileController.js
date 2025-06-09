@@ -1,6 +1,6 @@
 import { getUserById } from "../dao/UserDAO.js";
-import { getAllGamesCurrentUser } from "../dao/GameDAO.js";
-import { getAllCardsByGameId } from "../dao/GameCardDAO.js";
+import { getAllGamesByUserId } from "../dao/GameDAO.js";
+import { getAllRoundsByGameId } from "../dao/RoundDAO.js";
 import { getCardByCardId } from "../dao/CardDAO.js";
 
 export const getProfileInfo = async (profileId) => {
@@ -8,7 +8,7 @@ export const getProfileInfo = async (profileId) => {
     const users = await getUserById(parseInt(profileId));
     const user = users[0];
 
-    const games = await getAllGamesCurrentUser(profileId);
+    const games = await getAllGamesByUserId(profileId);
 
     const gamesPlayed = games.length;
     const gamesWon = games.filter((game) => game.status === "won").length;
@@ -52,22 +52,25 @@ export const getProfileInfo = async (profileId) => {
   }
 };
 
-export const getProfileHistory = async () => {
+export const getProfileHistory = async (userId) => {
   try {
-    const user = await getCurrentUser();
-    const completedGames = await getAllGamesCurrentUser();
+    const completedGames = await getAllGamesByUserId(userId);
     const history = [];
 
     for (const game of completedGames) {
-      const cardsInGame = await getAllCardsByGameId(game.gameId);
-      const enrichedCards = [];
+      const rounds = await getAllRoundsByGameId(game.gameId);
+      const enrichedRounds = [];
 
-      for (const cardEntry of cardsInGame) {
-        const card = await getCardByCardId(cardEntry.cardId);
-        enrichedCards.push({
-          name: card.name,
-          imageUrl: card.imageUrl,
-          acquiredInRound: cardEntry.acquiredInRound,
+      for (const round of rounds) {
+        const card = await getCardByCardId(round.cardId);
+        enrichedRounds.push({
+          roundNumber: round.roundNumber,
+          isWon: round.isWon,
+          playedAt: round.playedAt,
+          card: {
+            name: card.name,
+            description: card.description,
+          }
         });
       }
 
@@ -76,17 +79,21 @@ export const getProfileHistory = async () => {
         status: game.status,
         createdAt: game.createdAt,
         totalCardsWon: game.totalCardsWon,
-        cards: enrichedCards,
+        totalCardsLost: game.totalCardsLost,
+        rounds: enrichedRounds
       });
-    }
+    }    
     return {
       success: true,
-      data: history,
+      data: history
     };
   } catch (error) {
     return {
       success: false,
-      data: { error },
+      data: { 
+        code: 500,
+        message: "Errore nel recupero della cronologia partite"
+      }
     };
   }
 };

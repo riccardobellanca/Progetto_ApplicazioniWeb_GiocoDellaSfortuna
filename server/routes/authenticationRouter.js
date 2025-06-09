@@ -11,9 +11,6 @@ router.post("/register", async (req, res) => {
 });
 
 router.post("/login", async (req, res, next) => {
-  if (req.user !== undefined)
-    console.log("previous UserSession => " + JSON.stringify(req.user, null, 2));
-
   const response = await login(req, res, next);
   response.success
     ? res.status(200).json(response)

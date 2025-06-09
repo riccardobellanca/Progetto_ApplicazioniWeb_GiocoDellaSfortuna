@@ -6,6 +6,7 @@ import { useUser } from "../contexts/UserContext";
 import { API } from "../API.mjs";
 import { checkInput } from "../service/loginService";
 import { useToast } from "../contexts/ToastContext";
+import { ApiError } from "../API.mjs";
 
 function LoginPage() {
   const [formData, setFormData] = useState({
@@ -37,7 +38,9 @@ function LoginPage() {
       navigate("/");
       showSuccess("Login effettuato con successo");
     } catch (error) {
-      showError(error.message);
+      const mes = error instanceof ApiError ? error.getMessage() : error.message;
+      showError(mes);
+      
     }
   };
   return (

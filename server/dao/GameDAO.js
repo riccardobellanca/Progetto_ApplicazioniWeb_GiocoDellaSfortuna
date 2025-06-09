@@ -48,7 +48,7 @@ export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
 /**
  * Cerca tutte le partite giocate da un utente
  */
-export async function getAllGamesCurrentUser(userId) {
+export async function getAllGamesByUserId(userId) {
   return new Promise((resolve, reject) => {
     const sql = `
      SELECT * FROM partite WHERE userId = ? AND (status = "won" OR status = "lost")
