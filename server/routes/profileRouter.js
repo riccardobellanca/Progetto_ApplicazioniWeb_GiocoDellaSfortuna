@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { isLoggedIn } from "../auth/auth-middleware.js";
+import { requireAuth, requireOwnership } from "../auth/auth-middleware.js";
 import {
   getProfileInfo,
   getProfileHistory,
@@ -7,12 +7,12 @@ import {
 
 const router = Router();
 
-router.get("/:profileId", async (req, res) => {
-  const result = await getProfileInfo(req);
+router.get("/:profileId", requireAuth, requireOwnership, async (req, res) => {
+  const result = await getProfileInfo(req.params.profileId);
   res.status(result.success ? 200 : result.data.code).json(result);
 });
 
-router.get("/:profileId/history", async (req, res) => {
+router.get("/:profileId/history", requireAuth, requireOwnership, async (req, res) => {
   const response = await getProfileHistory(req);
   response.success
     ? res.status(200).json(response)

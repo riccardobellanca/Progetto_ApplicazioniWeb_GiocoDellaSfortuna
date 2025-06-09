@@ -48,13 +48,13 @@ export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
 /**
  * Cerca tutte le partite giocate da un utente
  */
-export async function getAllGamesCurrentUser(req) {
+export async function getAllGamesCurrentUser(userId) {
   return new Promise((resolve, reject) => {
     const sql = `
      SELECT * FROM partite WHERE userId = ? AND (status = "won" OR status = "lost")
    `;
 
-    db.all(sql, [req.user.userId], (err, rows) => {
+    db.all(sql, [userId], (err, rows) => {
       if (err) reject({code : 500, message : "Impossibile trovare tutte le partite del giocatore corrente"});
       else resolve(rows || []);
     });

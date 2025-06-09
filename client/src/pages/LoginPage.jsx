@@ -32,6 +32,7 @@ function LoginPage() {
         username,
         password,
       );
+      console.log(userData);
       login(userData);
       navigate("/");
       showSuccess("Login effettuato con successo");

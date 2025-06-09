@@ -16,7 +16,7 @@ export async function createUser(username, password) {
 
   return new Promise((resolve, reject) => {
     db.run(sql, [username, salt, hash, createdAt], function (error) {
-      if (error) reject({code : 500, message : "Impossibile creare l'utente"});
+      if (error) reject({ code: 500, message: "Impossibile creare l'utente" });
       else resolve({ userId: this.lastID, username });
     });
   });
@@ -29,13 +29,17 @@ export async function rejectIfFindUserByUsername(username) {
   return new Promise((resolve, reject) => {
     const sql = "SELECT * FROM utenti WHERE username = ?";
     db.get(sql, [username], (err, row) => {
-      if (err) reject({ code: 500, message: "Errore nella verifica dell'utente" });
-      else if (row) reject({ code: 409, message: "Un utente con questo username esiste già" });
+      if (err)
+        reject({ code: 500, message: "Errore nella verifica dell'utente" });
+      else if (row)
+        reject({
+          code: 409,
+          message: "Un utente con questo username esiste già",
+        });
       else resolve();
     });
   });
 }
-
 
 /**
  * Verifica credenziali utente
@@ -45,7 +49,11 @@ export async function getUserByCredentials(username, password) {
     const sql = "SELECT * FROM utenti WHERE username = ?";
 
     db.get(sql, [username], (err, row) => {
-      if (err) return reject({code : 500, message : "Impossibile trovare l'utente con queste credenziali"});
+      if (err)
+        return reject({
+          code: 500,
+          message: "Impossibile trovare l'utente con queste credenziali",
+        });
       if (!row) return resolve(null);
       const hash = crypto
         .pbkdf2Sync(password, row.salt, 10000, 64, "sha512")
@@ -59,19 +67,17 @@ export async function getUserByCredentials(username, password) {
 /**
  * Verifica credenziali utente
  */
-export async function getCurrentUser(req) {
+export async function getUserById(userId) {
   return new Promise((resolve, reject) => {
-    const sql =
-      "SELECT userId,username,createdAt FROM utenti WHERE userId = ?";
+    const sql = "SELECT userId,username,createdAt FROM utenti WHERE userId = ?";
 
-    db.get(sql, [req.user.userId], (err, row) => {
-      if (err) return reject({code : 500, message : "Impossibile trovare l'utente corrente"});
-      else
-        resolve({
-          id: row.userId,
-          username: row.username,
-          createdAt: row.createdAt,
+    db.all(sql, [userId], (err, row) => {
+      if (err)
+        return reject({
+          code: 500,
+          message: err.message,
         });
+      resolve(row);
     });
   });
 }

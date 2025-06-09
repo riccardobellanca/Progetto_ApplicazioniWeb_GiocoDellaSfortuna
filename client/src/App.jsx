@@ -6,6 +6,10 @@ import RegisterPage from "./pages/RegisterPage";
 import UserProvider from "./contexts/UserContext";
 import NotFoundPage from "./pages/NotFoundPage";
 import ToastProvider from "./contexts/ToastContext";
+import ProfilePage from "./pages/ProfilePage";
+import UnauthorizedPage from "./pages/UnauthorizedPage";
+import ForbiddenPage from "./pages/ForbiddenPage";
+import ServerErrorPage from "./pages/ServerErrorPage";
 
 function App() {
   return (
@@ -16,6 +20,10 @@ function App() {
             <Route path="/" element={<HomePage />} />
             <Route path="/auth/login" element={<LoginPage />} />
             <Route path="/auth/register" element={<RegisterPage />} />
+            <Route path="/profile/:profileId" element={<ProfilePage />} />
+            <Route path="/unauthorized" element={<UnauthorizedPage />} />
+            <Route path="/forbidden" element={<ForbiddenPage />} />
+            <Route path="/serverError" element={<ServerErrorPage />} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </Router>

@@ -1,7 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 
 const UserContext = createContext(null);
-
 export const useUser = () => useContext(UserContext);
 
 export const UserProvider = ({ children }) => {
@@ -9,9 +8,17 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
-    if (savedUser && !savedUser === undefined) {
+    if (savedUser) {
       setUser(JSON.parse(savedUser));
     }
+
+    const handleStorageChange = () => {
+      const updatedUser = localStorage.getItem("user");
+      setUser(updatedUser ? JSON.parse(updatedUser) : null);
+    };
+
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
   const login = (userData) => {
@@ -31,4 +38,4 @@ export const UserProvider = ({ children }) => {
   );
 };
 
-export default UserProvider
+export default UserProvider;

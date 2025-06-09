@@ -1,8 +1,17 @@
 import { validationResult } from "express-validator";
 
-export const isLoggedIn = (req, res, next) => {
-  if (req.isAuthenticated()) return next();
-  return res.status(401).json({ error: "Not authorized" });
+export const requireAuth = (req, res, next) => {
+  if (!req.user || !req.user.userId) {
+    return res.status(401).json({ success: false, data: {code: 401, message: "Non autorizzato"} });
+  }
+  next();
+};
+
+export const requireOwnership = (req, res, next) => {
+  if (!req.user || req.user.userId !== parseInt(req.params.profileId)) {
+    return res.status(403).json({ success: false, data: {code: 403, message: "Accesso negato"} });
+  }
+  next();
 };
 
 export const checkValidation = (req, res, next) => {
@@ -16,17 +25,6 @@ export const checkValidation = (req, res, next) => {
     });
   }
   return next();
-};
-
-export const checkUserIdSession = (req, res, next) => {
-  const query_userId = parseInt(req.params.userId, 10);
-  const session_userId = req.user.userId;
-
-  if (query_userId !== session_userId) {
-    return res.status(403).json({ error: "Forbidden" });
-  }
-
-  next();
 };
 
 export const logout = (req, res) => {

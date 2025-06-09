@@ -1,4 +1,4 @@
-import db from "../db/database";
+import db from "../db/database.js";
 
 const games = [
   {
@@ -31,4 +31,9 @@ const games = [
   },
 ];
 
-games.forEach((game) => db.run("INSERT INTO partite ...", game));
+games.forEach((game) => 
+  db.run(
+    "INSERT INTO partite (userId, status, createdAt, totalCardsWon, totalCardsLost) VALUES (?, ?, ?, ?, ?)",
+    [game.userId, game.status, game.createdAt, game.totalCardsWon, game.totalCardsLost]
+  )
+);

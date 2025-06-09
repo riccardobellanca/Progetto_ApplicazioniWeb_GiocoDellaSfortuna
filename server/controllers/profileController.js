@@ -1,31 +1,35 @@
-import { getCurrentUser } from "../dao/UserDAO.js";
+import { getUserById } from "../dao/UserDAO.js";
 import { getAllGamesCurrentUser } from "../dao/GameDAO.js";
 import { getAllCardsByGameId } from "../dao/GameCardDAO.js";
 import { getCardByCardId } from "../dao/CardDAO.js";
 
-export const getProfileInfo = async (req) => {
+export const getProfileInfo = async (profileId) => {
   try {
+    const users = await getUserById(parseInt(profileId));
+    const user = users[0];
 
-    console.log("user => " + JSON.stringify(req.user.userId, null, 2));
-
-    const user = await getCurrentUser(req);
-    const games = await getAllGamesCurrentUser(req);
-
-    console.log("user => " + JSON.stringify(user, null, 2));
-    console.log("games => " + JSON.stringify(games, null, 2));
+    const games = await getAllGamesCurrentUser(profileId);
 
     const gamesPlayed = games.length;
     const gamesWon = games.filter((game) => game.status === "won").length;
     const gamesLost = games.filter((game) => game.status === "lost").length;
-    const dateLastgame = games.max((game) => game.createdAt);
+
+    const dateLastgame =
+      games.length > 0
+        ? games.reduce((latest, game) => {
+            const gameDate = new Date(game.createdAt);
+            return gameDate > latest ? gameDate : latest;
+          }, new Date(games[0].createdAt))
+        : "Non hai ancora mai giocato";
 
     return {
       success: true,
       data: {
-        id: user.id,
+        id: user.userId,
         username: user.username,
         createdAt: user.createdAt,
-        winRate: ((gamesWon / gamesPlayed) * 100).toFixed(1),
+        winRate:
+          gamesPlayed > 0 ? ((gamesWon / gamesPlayed) * 100).toFixed(1) : "0.0",
         games: {
           gamesPlayed: gamesPlayed,
           gamesWon: gamesWon,

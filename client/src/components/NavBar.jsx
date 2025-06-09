@@ -8,6 +8,7 @@ function NavBar() {
   const { user, logout } = useUser();
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
+
   const handleLogout = async () => {
     try {
       await API.logout();
@@ -15,8 +16,12 @@ function NavBar() {
       navigate("/");
       showSuccess("Logout effettuato con successo");
     } catch (error) {
-      showError(error);
+      showError(error.message);
     }
+  };
+
+  const handleProfile = () => {
+    navigate(`/profile/${user.userId}`);
   };
 
   return (
@@ -39,9 +44,13 @@ function NavBar() {
               </>
             ) : (
               <>
-                <span className="me-3">
-                  Bentornato, <strong>{user.username}</strong>
-                </span>
+                <Button 
+                  variant="outline-secondary" 
+                  onClick={handleProfile}
+                  className="me-2"
+                >
+                  Profilo
+                </Button>
                 <Button variant="outline-primary" onClick={handleLogout}>
                   Logout
                 </Button>

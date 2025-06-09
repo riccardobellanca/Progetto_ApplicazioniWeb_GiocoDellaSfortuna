@@ -1,75 +1,57 @@
+// API.mjs
 const SERVER_URL = "http://localhost:5000";
-export const API = {};
 
-API.login = async (username, password) => {
-  try {
-    const response = await fetch(SERVER_URL + "/auth/login", {
+class ApiError extends Error {
+  constructor(message, code) {
+    super(message);
+    this.code = code;
+  }
+}
+
+const handleApiCall = async (url, options = {}) => {
+  const response = await fetch(url, {
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  const responseJson = await response.json();
+
+  if (!responseJson.success) {
+    //console.log("responseJson => " + JSON.stringify(responseJson,null,2));
+    throw new ApiError(
+      responseJson.data?.message || "Errore API",
+      responseJson.data?.code || response.status
+    );
+  }
+
+  return responseJson.data;
+};
+
+export const API = {
+  login: async (username, password) => {
+    return handleApiCall(SERVER_URL + "/auth/login", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
+  },
 
-    const response_json = await response.json();
-
-    if (response_json.success) return response_json.data;
-    else throw new Error(response_json.data.message);
-  } catch (error) {
-    if (error !== undefined) throw error;
-    throw new Error("Impossibile connettersi al server");
-  }
-};
-
-API.register = async (username, password) => {
-  try {
-    const response = await fetch(SERVER_URL + "/auth/register", {
+  register: async (username, password) => {
+    return handleApiCall(SERVER_URL + "/auth/register", {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
       body: JSON.stringify({ username, password }),
     });
+  },
 
-    const response_json = await response.json();
-
-    if (response_json.success) return response_json.data;
-    else throw new Error(response_json.data.message);
-  } catch (error) {
-    if (error !== undefined) throw error;
-    throw new Error("Impossibile connettersi al server");
-  }
-};
-
-API.logout = async () => {
-  try {
-    const res = await fetch(SERVER_URL + "/auth/logout", {
+  logout: async () => {
+    return handleApiCall(SERVER_URL + "/auth/logout", {
       method: "POST",
-      credentials: "include",
     });
+  },
 
-    if (!res.ok) {
-      const error = await res.json().catch(() => ({}));
-      throw new Error(error.message || "Logout fallito");
-    }
-
-    return true;
-  } catch (err) {
-    throw new Error(err.message || "Impossibile connettersi al server");
-  }
+  getProfileInfo: async (profileId) => {
+    return handleApiCall(SERVER_URL + `/profile/${profileId}`, {
+      method: "GET",
+    });
+  },
 };
-
-
-
-
-
-
-
-
-
-
-
-
-
