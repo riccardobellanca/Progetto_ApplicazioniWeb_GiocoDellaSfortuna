@@ -13,7 +13,7 @@ export class ApiError extends Error {
 }
 
 const handleApiCall = async (url, options = {}) => {
-  /*
+  
   console.group(`🚀 ${options.method} ${url}`);
   console.log("📦 Body:", JSON.stringify(options.body,null,2));
   console.log("📋 Headers:", {
@@ -23,7 +23,7 @@ const handleApiCall = async (url, options = {}) => {
   });
   console.log("⚙️ Full Options:", JSON.stringify(options,null,2));
   console.groupEnd();
-*/
+
 
   const response = await fetch(url, {
     credentials: "include",
@@ -89,4 +89,24 @@ export const API = {
       body: JSON.stringify({ gameId, position }),
     });
   },
+
+  checkSession: async () => {
+    return handleApiCall(SERVER_URL + "/session", {
+      method : "GET",
+    })
+  },
+
+  startDemo: async () => {
+    return handleApiCall(SERVER_URL + `/demo`, {
+      method: "GET",
+    });
+  },
+
+  submitDemoGuess: async (gameId, position) => {
+    return handleApiCall(SERVER_URL + "/demo/guess", {
+      method: "POST",
+      body: JSON.stringify({ gameId, position }),
+    });
+  },
+
 };

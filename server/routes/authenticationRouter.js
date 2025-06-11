@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { register, login } from "../controllers/authController.js";
+import { register, login, requireAuth } from "../controllers/authController.js";
 
 const router = Router();
 
@@ -45,6 +45,14 @@ router.post("/logout", (req, res) => {
       });
     });
   });
+});
+
+router.get("/session", requireAuth, (req,res) => {
+  const response = {
+    success : true,
+    data : {}
+  }
+  res.status(200).json(response);
 });
 
 export default router;

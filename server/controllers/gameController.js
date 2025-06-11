@@ -21,15 +21,16 @@ export const createGame = async (req) => {
     req.session.failedAttempts = 0;
     req.session.cardsWon = 0;
     req.session.playerCards = gameData.initialCards;
+    req.session.roundStartTime = Date.now(); // Salva il timestamp di inizio round
 
     return {
       success: true,
       data: {
         gameId: gameData.gameId,
         round: 1,
-        cardsWon: 0,
+        cardsWon: 3,
         cardsLost: 0,
-        status: "ongoing",
+        status: "in_progress",
         hand: gameData.initialCards,
         challengeCard: gameData.challengeCard,
       },
@@ -53,13 +54,29 @@ export const submitGuess = async (req) => {
       throw new Error("Invalid game ID");
     }
 
-    // Gestione timeout
-    const isTimeout = position === -1;
+    // Controllo del tempo lato server
+    const currentTime = Date.now();
+    const timeElapsed = currentTime - req.session.roundStartTime;
+    const MAX_TIME_MS = 30000;
+    const GRACE_PERIOD_MS = 1000;
+
+    let actualPosition = position;
+    let isTimeout = position === -1;
+    
+    if (timeElapsed > MAX_TIME_MS + GRACE_PERIOD_MS && position !== -1) {
+      actualPosition = -1;
+      isTimeout = true;
+    }
+
+    if (!req.session.roundStartTime) {
+      console.error("roundStartTime non trovato nella sessione!");
+      throw new Error("Invalid game state");
+    }
 
     const result = await processGuess(
       req.session.gameId,
       req.session.currentCard,
-      position,
+      actualPosition,
       req.session.roundNumber,
       req.session.playerCards,
       req.session.failedAttempts,
@@ -67,7 +84,6 @@ export const submitGuess = async (req) => {
       isTimeout
     );
 
-    // Aggiorna sessione
     req.session.roundNumber++;
     req.session.failedAttempts = result.failedAttempts;
     req.session.cardsWon = result.cardsWon;
@@ -88,20 +104,27 @@ export const submitGuess = async (req) => {
 
     if (result.gameStatus === "in_progress") {
       req.session.currentCard = result.nextCard;
+      req.session.roundStartTime = Date.now();
+      
       if (result.isCorrect && !isTimeout) {
         response.hand = result.updatedHand;
+      } else {
+        response.hand = req.session.playerCards;
       }
+      
       response.nextChallengeCard = removeIndex(result.nextCard);
     }
+    
     return {
       success : true,
       data : response
     };
   } catch (error) {
+    console.error("Errore in submitGuess:", error);
     return {
       success : false,
       data : {
-        code : error.code,
+        code : error.code || 500,
         message : error.message
       }
     }
@@ -117,6 +140,7 @@ const startNewGame = async (userId) => {
     .sort((a, b) => a.misfortuneIndex - b.misfortuneIndex);
 
   for (const card of initialCards) {
+    await roundDAO.saveRound(card.cardId, 0, true, game.gameId);
     await cardPlayedDAO.saveGameCard(card.cardId, 0, game.gameId);
   }
   const challengeCard = shuffled[3];

@@ -3,11 +3,18 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useToast } from "../contexts/ToastContext";
 import { API } from "../API.mjs";
+import { useEffect } from "react";
 
 function NavBar() {
-  const { user, logout } = useUser();
+  const { user, logout, checkSession } = useUser();
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (user) {
+      checkSession;
+    }
+  }, []);
 
   const handleLogout = async () => {
     try {
@@ -44,8 +51,8 @@ function NavBar() {
               </>
             ) : (
               <>
-                <Button 
-                  variant="outline-secondary" 
+                <Button
+                  variant="outline-secondary"
                   onClick={handleProfile}
                   className="me-2"
                 >

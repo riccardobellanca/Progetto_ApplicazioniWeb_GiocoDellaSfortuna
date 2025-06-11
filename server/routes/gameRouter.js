@@ -1,6 +1,6 @@
 import { Router } from "express";
 import * as gameController from "../controllers/gameController.js";
-import {requireAuth} from "../auth/auth-middleware.js"
+import { requireAuth } from "../controllers/authController.js";
 import { createGame } from "../controllers/gameController.js";
 
 const router = Router();

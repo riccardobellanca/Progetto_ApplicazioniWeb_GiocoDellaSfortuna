@@ -1,23 +1,15 @@
 import { Router } from "express";
-import * as demoController from "../controllers/demoController.js";
+import { createDemo, submitDemoGuess} from "../controllers/demoController.js";
 
 const router = Router();
 
-router.post("", (req, res) => {
-  try {
-    res.status(201).json(demoController.createDemo(req));
-  } catch (error) {
-    res.status(500).json(error);
-  }
+router.get("", async (req, res) => {
+  const result = await createDemo(req);
+  res.status(result.success ? 200 : result.data.code).json(result);
 });
 
 router.post("/guess", async (req, res) => {
-  try {
-    const result = await demoController.submitDemoGuess(req);
-    res.status(200).json(result);
-  } catch (error) {
-    res.status(500).json(error);
-  }
+  const result = await submitDemoGuess(req);
+  res.status(result.success ? 200 : result.data.code).json(result);
 });
-
 export default router;

@@ -7,7 +7,6 @@ import {
   Card,
   Button,
   Badge,
-  Alert,
   Spinner,
   Modal,
 } from "react-bootstrap";
@@ -15,7 +14,7 @@ import { API } from "../API.mjs";
 import { useToast } from "../contexts/ToastContext";
 import NavBar from "../components/NavBar";
 
-function GamePage() {
+function DemoGamePage() {
   const [gameData, setGameData] = useState(null);
   const [selectedPosition, setSelectedPosition] = useState(null);
   const [hoveredPosition, setHoveredPosition] = useState(null);
@@ -27,19 +26,13 @@ function GamePage() {
   const [gameEnded, setGameEnded] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
 
-
-  const { showError, showSuccess } = useToast();
+  const { showError } = useToast();
   const navigate = useNavigate();
   const timerRef = useRef(null);
   const gameIdRef = useRef(null);
 
-  const redirectTo = (statusCode) => {
-    if (statusCode === 401) navigate("/unauthorized");
-    if (statusCode === 403) navigate("/forbidden");
-  };
-
   useEffect(() => {
-    startNewGame();
+    startNewDemo();
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -70,24 +63,19 @@ function GamePage() {
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [gameData?.round, submitting, showResultModal]);
+  }, [gameData, submitting, showResultModal]);
 
-  const startNewGame = async () => {
+  const startNewDemo = async () => {
     try {
       setLoading(true);
-      const data = await API.startGame();
+      const data = await API.startDemo();
       setGameData(data);
       gameIdRef.current = data.gameId;
       setSelectedPosition(null);
       setGameEnded(false);
       setIsTimeout(false);
     } catch (err) {
-      if (err.code === 500) {
-        const mes = err instanceof ApiError ? err.getMessage() : err.message;
-        showError(mes);
-      } else {
-        redirectTo(err.code);
-      }
+      showError("Errore nell'avvio della demo");
     } finally {
       setLoading(false);
     }
@@ -98,14 +86,14 @@ function GamePage() {
 
     const currentGameId = gameIdRef.current;
     if (!currentGameId) {
-      console.error("GameId non trovato nel ref!");
+      console.error("GameId non trovato!");
       return;
     }
 
     try {
       setSubmitting(true);
       setIsTimeout(true);
-      const result = await API.submitGuess(currentGameId, -1);
+      const result = await API.submitDemoGuess(currentGameId, -1);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nel processare il timeout");
@@ -121,14 +109,14 @@ function GamePage() {
 
     const currentGameId = gameIdRef.current;
     if (!currentGameId) {
-      console.error("GameId non trovato nel ref!");
+      console.error("GameId non trovato!");
       return;
     }
 
     try {
       setSubmitting(true);
       setIsTimeout(false);
-      const result = await API.submitGuess(currentGameId, selectedPosition);
+      const result = await API.submitDemoGuess(currentGameId, selectedPosition);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nell'invio della risposta");
@@ -140,41 +128,26 @@ function GamePage() {
   const processGuessResult = (result) => {
     setLastResult(result);
     setShowResultModal(true);
-
-    if (result.gameStatus === "won" || result.gameStatus === "lost") {
-      setGameEnded(true);
-    } else {
+    setGameEnded(true);
+    
+    if (result.hand) {
       setGameData(prevData => ({
         ...prevData,
-        round: result.round,
-        cardsWon: result.cardsWon,
-        cardsLost: result.cardsLost,
-        hand: result.hand || prevData.hand,
-        challengeCard: result.nextChallengeCard,
-        status: result.gameStatus,
+        hand: result.hand
       }));
-      setSelectedPosition(null);
-      setHoveredPosition(null);
     }
   };
 
   const handleCloseResultModal = () => {
     setShowResultModal(false);
-    
-    if (!gameEnded) {
-      setLastResult(null);
-      setIsTimeout(false);
-      setSelectedPosition(null);
-      setHoveredPosition(null);
-    }
   };
 
-  const handleNewGame = () => {
+  const handleNewDemo = () => {
     setShowResultModal(false);
     setLastResult(null);
     setIsTimeout(false);
     setGameEnded(false);
-    startNewGame();
+    startNewDemo();
   };
 
   const handleBackToHome = () => {
@@ -222,6 +195,14 @@ function GamePage() {
         className="game-container"
         style={{ minHeight: "calc(100vh - 56px)", overflowY: "auto", paddingBottom: "20px" }}
       >
+        {/* Demo Banner */}
+        <Row className="bg-info text-white py-2">
+          <Col className="text-center">
+            <i className="bi bi-info-circle me-2"></i>
+            <strong>MODALITÀ DEMO</strong> - Prova il gioco con un singolo round!
+          </Col>
+        </Row>
+
         {/* Stats Bar */}
         <Row
           className="stats-bar py-2"
@@ -233,15 +214,7 @@ function GamePage() {
             <div className="d-flex justify-content-around align-items-center text-white">
               <div className="text-center">
                 <i className="bi bi-bullseye fs-5"></i>
-                <h6 className="mb-0">Round {gameData?.round || 0}</h6>
-              </div>
-              <div className="text-center">
-                <i className="bi bi-trophy-fill fs-5 text-success"></i>
-                <h6 className="mb-0">{gameData?.cardsWon || 0}/6 Carte</h6>
-              </div>
-              <div className="text-center">
-                <i className="bi bi-x-circle-fill fs-5 text-danger"></i>
-                <h6 className="mb-0">{gameData?.cardsLost || 0}/3 Errori</h6>
+                <h6 className="mb-0">Round 1/1</h6>
               </div>
               <div className="text-center">
                 <i className="bi bi-clock-fill fs-5"></i>
@@ -432,17 +405,13 @@ function GamePage() {
         show={showResultModal} 
         onHide={handleCloseResultModal} 
         centered
-        size={gameEnded ? "lg" : "md"}
+        size="lg"
         backdrop="static"
         keyboard={false}
       >
         <Modal.Header
           className={
-            gameEnded
-              ? lastResult?.gameStatus === "won"
-                ? "bg-success text-white"
-                : "bg-danger text-white"
-              : isTimeout
+            isTimeout
               ? "bg-warning text-dark"
               : lastResult?.success
               ? "bg-success text-white"
@@ -452,190 +421,63 @@ function GamePage() {
           <Modal.Title>
             <i
               className={`bi bi-${
-                gameEnded
-                  ? lastResult?.gameStatus === "won"
-                    ? "trophy-fill"
-                    : "x-octagon-fill"
-                  : isTimeout 
+                isTimeout 
                   ? "clock-history"
                   : lastResult?.success 
                   ? "check-circle" 
                   : "x-circle"
               } me-2`}
             ></i>
-            {gameEnded 
-              ? lastResult?.gameStatus === "won" 
-                ? "Hai Vinto!" 
-                : "Hai Perso!"
-              : isTimeout 
-              ? "Tempo Scaduto!" 
-              : lastResult?.success 
-              ? "Ottimo!" 
-              : "Peccato!"}
+            Demo Completata!
           </Modal.Title>
         </Modal.Header>
         <Modal.Body>
-          {gameEnded ? (
-            // Fine partita
-            <div>
-              <div className="text-center mb-4">
-                {lastResult?.gameStatus === "won" ? (
-                  <>
-                    <h4 className="text-success">Complimenti!</h4>
-                    <p className="lead">Hai completato la partita vincendo {lastResult?.cardsWon || 0} carte!</p>
-                  </>
-                ) : (
-                  <>
-                    <h4 className="text-danger">Partita Terminata</h4>
-                    <p className="lead">Hai commesso 3 errori. Hai comunque collezionato {lastResult?.cardsWon || 0} carte!</p>
-                  </>
-                )}
-              </div>
+          <div className="text-center mb-4">
+            {isTimeout ? (
+              <>
+                <h5 className="mb-3">Il tempo è scaduto!</h5>
+                <p>Non hai fatto in tempo a posizionare la carta.</p>
+                <p>
+                  La posizione corretta era: <strong>{lastResult?.correctPosition}</strong>
+                </p>
+              </>
+            ) : lastResult?.success ? (
+              <>
+                <h5 className="text-success mb-3">Ottimo lavoro!</h5>
+                <p>Hai indovinato la posizione corretta!</p>
+              </>
+            ) : (
+              <>
+                <h5 className="text-danger mb-3">Posizione sbagliata!</h5>
+                <p>
+                  La posizione corretta era: <strong>{lastResult?.correctPosition}</strong>
+                </p>
+              </>
+            )}
+            
+            <p className="mt-3">
+              L'indice di sfortuna della carta era:{" "}
+              <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
+            </p>
+          </div>
 
-              {/* Riepilogo carte vinte */}
-              {gameData?.hand && gameData.hand.length > 0 && (
-                <div>
-                  <h5 className="mb-3 text-center">
-                    {lastResult?.gameStatus === "won" 
-                      ? "Riepilogo delle carte vinte:" 
-                      : "Carte collezionate prima della sconfitta:"}
-                  </h5>
-                  <Row className="g-3">
-                    {/* Mostra le carte in mano */}
-                    {gameData.hand.map((card, index) => (
-                      <Col key={`hand-${index}`} xs={12} sm={6} md={4}>
-                        <Card className="h-100 shadow-sm">
-                          <Card.Body className="p-3">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                              <h6 className="card-title mb-0" style={{ fontSize: "0.9rem", flex: 1 }}>
-                                {card.name}
-                              </h6>
-                              <Badge
-                                bg={
-                                  card.misfortuneIndex >= 70
-                                    ? "danger"
-                                    : card.misfortuneIndex >= 40
-                                    ? "warning"
-                                    : "success"
-                                }
-                                className="ms-2"
-                              >
-                                {card.misfortuneIndex}
-                              </Badge>
-                            </div>
-                            <p className="card-text small text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                              {card.description}
-                            </p>
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    ))}
-                    
-                    {/* Mostra la challenge card finale solo se ha vinto */}
-                    {lastResult?.gameStatus === "won" && lastResult?.cardDetails && (
-                      <Col xs={12} sm={6} md={4}>
-                        <Card className="h-100 shadow-sm border-warning">
-                          <Card.Body className="p-3">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                              <h6 className="card-title mb-0" style={{ fontSize: "0.9rem", flex: 1 }}>
-                                {lastResult.cardDetails.name}
-                              </h6>
-                              <Badge
-                                bg={
-                                  lastResult.cardDetails.misfortuneIndex >= 70
-                                    ? "danger"
-                                    : lastResult.cardDetails.misfortuneIndex >= 40
-                                    ? "warning"
-                                    : "success"
-                                }
-                                className="ms-2"
-                              >
-                                {lastResult.cardDetails.misfortuneIndex}
-                              </Badge>
-                            </div>
-                            <p className="card-text small text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                              {lastResult.cardDetails.description}
-                            </p>
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    )}
-                  </Row>
-                </div>
-              )}
-              
-              {/* Messaggio se non ci sono carte */}
-              {(!gameData?.hand || gameData.hand.length === 0) && (
-                <div className="text-center text-muted py-4">
-                  <i className="bi bi-inbox fs-1 mb-3 d-block"></i>
-                  <p>Non hai collezionato carte in questa partita.</p>
-                </div>
-              )}
-            </div>
-          ) : (
-            // Round normale
-            <>
-              {isTimeout ? (
-                <div className="text-center">
-                  <h5 className="mb-3">Il tempo è scaduto!</h5>
-                  <p>
-                    Non hai fatto in tempo a posizionare la carta.
-                  </p>
-                  <p>
-                    La posizione corretta era:{" "}
-                    <strong>{lastResult?.correctPosition}</strong>
-                  </p>
-                  <p>
-                    L'indice di sfortuna della carta era:{" "}
-                    <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-                  </p>
-                </div>
-              ) : lastResult?.success ? (
-                <div className="text-center">
-                  <h5 className="mb-3">Hai indovinato!</h5>
-                  <p>
-                    La carta "{lastResult?.cardDetails?.name}" ha un indice di
-                    sfortuna di{" "}
-                    <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-                  </p>
-                  <p>È stata aggiunta alla tua mano!</p>
-                </div>
-              ) : (
-                <div className="text-center">
-                  <h5 className="mb-3">Posizione sbagliata!</h5>
-                  <p>
-                    La posizione corretta era:{" "}
-                    <strong>{lastResult?.correctPosition}</strong>
-                  </p>
-                  <p>
-                    L'indice di sfortuna era:{" "}
-                    <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-                  </p>
-                </div>
-              )}
-            </>
-          )}
+          <div className="alert alert-info text-center">
+            <i className="bi bi-info-circle me-2"></i>
+            Questa era una partita demo. Registrati per giocare partite complete!
+          </div>
         </Modal.Body>
         <Modal.Footer>
-          {gameEnded ? (
-            <>
-              <Button variant="secondary" onClick={handleBackToHome}>
-                Torna alla Home
-              </Button>
-              <Button variant="primary" onClick={handleNewGame}>
-                <i className="bi bi-arrow-repeat me-2"></i>
-                Nuova Partita
-              </Button>
-            </>
-          ) : (
-            <Button variant="primary" onClick={handleCloseResultModal}>
-              Prossimo Round
-            </Button>
-          )}
+          <Button variant="secondary" onClick={handleBackToHome}>
+            Torna alla Home
+          </Button>
+          <Button variant="primary" onClick={handleNewDemo}>
+            <i className="bi bi-arrow-repeat me-2"></i>
+            Nuova Demo
+          </Button>
         </Modal.Footer>
       </Modal>
     </>
   );
 }
 
-export default GamePage;
+export default DemoGamePage;

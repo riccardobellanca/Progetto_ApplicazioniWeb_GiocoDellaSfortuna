@@ -11,6 +11,7 @@ import UnauthorizedPage from "./pages/UnauthorizedPage";
 import ForbiddenPage from "./pages/ForbiddenPage";
 import ServerErrorPage from "./pages/ServerErrorPage";
 import GamePage from './pages/GamePage';
+import DemoPage from "./pages/DemoPage"
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
             <Route path="/auth/register" element={<RegisterPage />} />
             <Route path="/profile/:profileId" element={<ProfilePage />} />
             <Route path="/game" element={<GamePage/>}/>
+            <Route path="/demo" element={<DemoPage/>}/>
             <Route path="/unauthorized" element={<UnauthorizedPage />} />
             <Route path="/forbidden" element={<ForbiddenPage />} />
             <Route path="/serverError" element={<ServerErrorPage />} />

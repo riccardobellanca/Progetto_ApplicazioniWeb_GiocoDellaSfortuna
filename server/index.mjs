@@ -2,8 +2,8 @@
 import express from "express";
 import morgan from "morgan";
 import cors from "cors";
-import passport from "./auth/passport-config.js";
-import sessionMiddleware from "./auth/session-middleware.js";
+import passport from "./controllers/authController.js";
+import sessionMiddleware from "./session/session-middleware.js"
 
 import { CONFIG } from "./config/config.js";
 import authenticationRouter from "./routes/authenticationRouter.js";

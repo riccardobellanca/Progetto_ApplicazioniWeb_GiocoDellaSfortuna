@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { requireAuth, requireOwnership } from "../auth/auth-middleware.js";
+import { requireAuth, requireOwnership } from "../controllers/authController.js";
 import {
   getProfileInfo,
   getProfileHistory,
