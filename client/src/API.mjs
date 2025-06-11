@@ -13,6 +13,18 @@ export class ApiError extends Error {
 }
 
 const handleApiCall = async (url, options = {}) => {
+  /*
+  console.group(`🚀 ${options.method} ${url}`);
+  console.log("📦 Body:", JSON.stringify(options.body,null,2));
+  console.log("📋 Headers:", {
+    "Content-Type": "application/json",
+    credentials: "include",
+    ...options.headers,
+  });
+  console.log("⚙️ Full Options:", JSON.stringify(options,null,2));
+  console.groupEnd();
+*/
+
   const response = await fetch(url, {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -20,19 +32,9 @@ const handleApiCall = async (url, options = {}) => {
   });
 
   const responseJson = await response.json();
-
+  console.log("responseJson => " + JSON.stringify(responseJson,null,2));
+  
   if (!responseJson.success) {
-    console.log(
-      "responseJson => " +
-        JSON.stringify(
-          new ApiError(
-            responseJson.data?.message || "Errore API",
-            responseJson.data?.code || response.status
-          ),
-          null,
-          2
-        )
-    );
     throw new ApiError(
       responseJson.data?.message || "Errore API",
       responseJson.data?.code || response.status
@@ -72,6 +74,19 @@ export const API = {
   getProfileHistory: async (profileId) => {
     return handleApiCall(SERVER_URL + `/profile/${profileId}/history`, {
       method: "GET",
+    });
+  },
+
+  startGame: async () => {
+    return handleApiCall(SERVER_URL + `/game`, {
+      method: "GET",
+    });
+  },
+
+  submitGuess: async (gameId, position) => {
+    return handleApiCall(SERVER_URL + "/game/guess", {
+      method: "POST",
+      body: JSON.stringify({ gameId, position }),
     });
   },
 };

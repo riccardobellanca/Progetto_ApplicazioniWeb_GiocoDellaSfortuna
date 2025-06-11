@@ -6,13 +6,15 @@ import db from "../db/database.js";
 export async function saveGame(userId) {
   return new Promise((resolve, reject) => {
     const sql = `
-     INSERT INTO partite (userId, status, startedAt, totalCardsWon, totalCardsLost) 
+     INSERT INTO partite (userId, status, createdAt, totalCardsWon, totalCardsLost) 
      VALUES (?, ?, datetime('now'), ?, ?)
    `;
 
-    db.run(sql, [userId, "in_progress", 0, 0], function (err) {
-      if (err) reject({code : 500, message : "Impossibile creare la partita"});
-      else {
+    db.run(sql, [userId, "in_progress", 0, 0], function(err) {
+      if (err) {
+        console.error("Database error in saveGame:", err);
+        reject({code: 500, message: "Impossibile creare la partita"});
+      } else {
         resolve({
           gameId: this.lastID,
           userId,
@@ -33,7 +35,7 @@ export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
   return new Promise((resolve, reject) => {
     const sql = `
      UPDATE partite 
-     SET status = ?, totalCardsWon = ?, totalCardsLost = ?, completedAt = datetime('now')
+     SET status = ?, totalCardsWon = ?, totalCardsLost = ?, createdAt = datetime('now')
      WHERE gameId = ?
    `;
 

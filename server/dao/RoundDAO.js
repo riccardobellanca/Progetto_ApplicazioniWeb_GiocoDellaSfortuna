@@ -40,3 +40,16 @@ export function getAllRoundsByGameId(gameId) {
     });
   });
 }
+
+/**
+ * Cerca tutte le carte incontrate durante una partita
+ */
+export function getAllCardSeenIds(gameId) {
+  return new Promise((resolve,reject) => {
+    const sql = "SELECT cardId FROM rounds WHERE gameId = ?";
+    db.all(sql, [gameId], (err,rows) => {
+      if (err) reject({code : 500, message : "Impossibile trovare tutte le carte giocate della partite"});
+      else resolve(rows || []);
+    });
+  });
+}

@@ -1,4 +1,5 @@
 import db from "../db/database.js";
+import { getAllCardSeenIds } from "./RoundDAO.js"; 
 
 /**
 * Ottiene tutte le carte
@@ -32,8 +33,7 @@ export async function getCardByCardId(cardId) {
 export async function getNextCard(gameId) {
  try {
    const allCards = await getAllCards();
-   const usedCards = await getAllCardsByGameId(gameId);
-   const usedIds = usedCards.map(card => card.cardId);
+   const usedIds = await getAllCardSeenIds(gameId);
    
    const availableCards = allCards.filter(
      card => !usedIds.includes(card.cardId)

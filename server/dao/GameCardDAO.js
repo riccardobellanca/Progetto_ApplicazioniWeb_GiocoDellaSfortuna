@@ -7,12 +7,16 @@ import { GameCard } from "../entities/GameCard.js";
 export async function saveGameCard(cardId, acquiredInRound, gameId) {
   return new Promise((resolve, reject) => {
     const sql = `
-     INSERT INTO carte_del_gioco (gameId, cardId, position, acquiredInRound) 
-     VALUES (?, ?, (SELECT COUNT(*) FROM carte_del_gioco WHERE gameId = ?), ?)
+     INSERT INTO carte_del_gioco (gameId, cardId, acquiredInRound) 
+     VALUES (?, ?, ?)
    `;
 
-    db.run(sql, [gameId, cardId, gameId, acquiredInRound], function (err) {
-      if (err) reject({code : 500, message : "Impossibile salvare la carta del gioco"});
+    db.run(sql, [gameId, cardId, acquiredInRound], function (err) {
+      if (err)
+        reject({
+          code: 500,
+          message: "Impossibile salvare la carta del gioco",
+        });
       else {
         const cardPlayed = new GameCard(gameId, cardId, acquiredInRound);
         resolve(cardPlayed);
@@ -41,3 +45,21 @@ export function checkCardPosition(playerCards, newCardIndex, position) {
   );
 }
 
+/**
+ *
+ */
+export function getUsedCardIds(gameId) {
+  return new Promise((resolve, reject) => {
+    const sql = `
+     SELECT * FROM carte_del_gioco WHERE gameId = ?`;
+
+    db.all(sql, [gameId], (err, rows) => {
+      if (err)
+        reject({
+          code: 500,
+          message: "Impossibile trovare le carte della partita selezionata",
+        });
+      resolve(rows.map((rows) => rows.cardId));
+    });
+  });
+}
