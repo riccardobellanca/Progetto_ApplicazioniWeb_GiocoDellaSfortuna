@@ -10,6 +10,7 @@ import authenticationRouter from "./routes/authenticationRouter.js";
 import gameRouter from "./routes/gameRouter.js";
 import demoRouter from "./routes/demoRouter.js";
 import profileRouter from "./routes/profileRouter.js";
+import imageRouter from "./routes/imageRouter.js"
 
 // init express
 export const app = new express();
@@ -36,6 +37,7 @@ app.use(CONFIG.AUTH_ROUTES, authenticationRouter);
 app.use(CONFIG.PROFILE_ROUTES, profileRouter);
 app.use(CONFIG.GAME_ROUTES, gameRouter);
 app.use(CONFIG.DEMO_ROUTES, demoRouter);
+app.use(CONFIG.IMAGES_ROUTES, imageRouter);
 
 // server listening...
 app.listen(port, () => {

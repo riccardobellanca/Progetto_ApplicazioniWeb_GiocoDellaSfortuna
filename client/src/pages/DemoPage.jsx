@@ -250,7 +250,7 @@ function DemoGamePage() {
                   {gameData?.challengeCard?.imageUrl && (
                     <div className="text-center">
                       <img
-                        src={gameData.challengeCard.imageUrl}
+                        src={API.retrieveImage(gameData.challengeCard.imageUrl).image}
                         alt={gameData.challengeCard.name}
                         className="img-fluid rounded"
                         style={{ maxHeight: "80px", objectFit: "contain" }}

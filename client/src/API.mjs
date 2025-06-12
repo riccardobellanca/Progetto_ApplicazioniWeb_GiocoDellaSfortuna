@@ -14,16 +14,15 @@ export class ApiError extends Error {
 
 const handleApiCall = async (url, options = {}) => {
   
-  console.group(`🚀 ${options.method} ${url}`);
-  console.log("📦 Body:", JSON.stringify(options.body,null,2));
-  console.log("📋 Headers:", {
+  console.group(`${options.method} ${url}`);
+  console.log("Body:", JSON.stringify(options.body, null, 2));
+  console.log("Headers:", {
     "Content-Type": "application/json",
     credentials: "include",
     ...options.headers,
   });
-  console.log("⚙️ Full Options:", JSON.stringify(options,null,2));
+  console.log("Full Options:", JSON.stringify(options, null, 2));
   console.groupEnd();
-
 
   const response = await fetch(url, {
     credentials: "include",
@@ -32,8 +31,8 @@ const handleApiCall = async (url, options = {}) => {
   });
 
   const responseJson = await response.json();
-  console.log("responseJson => " + JSON.stringify(responseJson,null,2));
-  
+  console.log("responseJson => " + JSON.stringify(responseJson, null, 2));
+
   if (!responseJson.success) {
     throw new ApiError(
       responseJson.data?.message || "Errore API",
@@ -92,8 +91,8 @@ export const API = {
 
   checkSession: async () => {
     return handleApiCall(SERVER_URL + "/session", {
-      method : "GET",
-    })
+      method: "GET",
+    });
   },
 
   startDemo: async () => {
@@ -109,4 +108,9 @@ export const API = {
     });
   },
 
+  retrieveImage: (imageName) => {
+    return handleApiCall(SERVER_URL + `/images/${imageName}`, {
+      method: "GET",
+    });
+  },
 };
