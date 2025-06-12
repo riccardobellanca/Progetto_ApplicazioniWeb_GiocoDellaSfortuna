@@ -1,17 +1,37 @@
 import { Router } from "express";
-import * as gameController from "../controllers/gameController.js";
 import { requireAuth } from "../controllers/authController.js";
-import { createGame } from "../controllers/gameController.js";
+import { createGame, submitGuess } from "../controllers/gameController.js";
+import { body } from "express-validator";
+import { checkValidation } from "../controllers/authController.js";
 
 const router = Router();
+
+const validateGuess = [
+  body("position")
+    .notEmpty()
+    .withMessage("Position è richiesta")
+    .isInt({ min: 0, max: 6 })
+    .withMessage(
+      "Position deve essere un intero con valore compreso fra 0 e 6"
+    ),
+];
+
 
 router.get("", requireAuth, async (req, res) => {
   const result = await createGame(req);
   res.status(result.success ? 200 : result.data.code).json(result);
 });
 
-router.post("/guess", requireAuth, async (req, res) => {
-  const result = await gameController.submitGuess(req);
-  res.status(result.success ? 200 : result.data.code).json(result);
-});
+
+router.post(
+  "/guess",
+  requireAuth,
+  validateGuess,
+  checkValidation,
+  async (req, res) => {
+    const result = await submitGuess(req);
+    res.status(result.success ? 200 : result.data.code).json(result);
+  }
+);
+
 export default router;

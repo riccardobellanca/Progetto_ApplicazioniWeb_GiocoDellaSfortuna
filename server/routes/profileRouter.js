@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { requireAuth, requireOwnership } from "../controllers/authController.js";
+import { param } from "express-validator";
+import { requireAuth, requireOwnership, checkValidation } from "../controllers/authController.js";
 import {
   getProfileInfo,
   getProfileHistory,
@@ -7,16 +8,48 @@ import {
 
 const router = Router();
 
-router.get("/:profileId", requireAuth, requireOwnership, async (req, res) => {
-  const result = await getProfileInfo(req.params.profileId);
-  res.status(result.success ? 200 : result.data.code).json(result);
-});
+const validateProfileId = [
+  param("profileId")
+    .isInt({ min: 1 })
+    .withMessage("Profile ID deve essere un numero valido")
+];
 
-router.get("/:profileId/history", requireAuth, requireOwnership, async (req, res) => {
-  const response = await getProfileHistory(req.params.profileId);
-  response.success
-    ? res.status(200).json(response)
-    : res.status(response.data.code).json(response);
-});
+router.get("/:profileId", 
+  validateProfileId,
+  checkValidation,
+  requireAuth, 
+  requireOwnership, 
+  async (req, res) => {
+    try {
+      const result = await getProfileInfo(req.params.profileId);
+      const statusCode = result.success ? 200 : (result.data?.code || 400);
+      res.status(statusCode).json(result);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        data: { message: "Errore interno del server", code: 500 }
+      });
+    }
+  }
+);
+
+router.get("/:profileId/history", 
+  validateProfileId,
+  checkValidation,
+  requireAuth, 
+  requireOwnership, 
+  async (req, res) => {
+    try {
+      const response = await getProfileHistory(req.params.profileId);
+      const statusCode = response.success ? 200 : (response.data?.code || 400);
+      res.status(statusCode).json(response);
+    } catch (error) {
+      res.status(500).json({
+        success: false,
+        data: { message: "Errore interno del server", code: 500 }
+      });
+    }
+  }
+);
 
 export default router;

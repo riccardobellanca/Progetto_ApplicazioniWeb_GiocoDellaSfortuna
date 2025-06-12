@@ -42,12 +42,7 @@ export async function getNextCard(gameId) {
   try {
     const allCards = await getAllCards();
     const usedIdsObjects = await getAllCardSeenIds(gameId);
-    
-    // Estrai solo i valori cardId dagli oggetti
-    const usedIds = usedIdsObjects.map(obj => obj.cardId);
-    
-    console.log("usedIds => " + JSON.stringify(usedIds, null, 2));
-    
+    const usedIds = usedIdsObjects.map(obj => obj.cardId);    
     const availableCards = allCards.filter(
       (card) => !usedIds.includes(card.cardId)
     );

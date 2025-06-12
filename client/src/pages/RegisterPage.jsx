@@ -38,7 +38,7 @@ function RegisterPage() {
     const { username, password, confirmPassword } = formData;
     try {
       checkInput(username, password, confirmPassword);
-      const userData = await API.register(username, password);
+      const userData = await API.register(username, password, confirmPassword);
       login(userData);
       navigate("/");
       showSuccess("Registrazione effettuata con successo");

@@ -45,7 +45,12 @@ function DemoGamePage() {
   }, [gameData?.gameId]);
 
   useEffect(() => {
-    if (gameData && gameData.status === "in_progress" && !submitting && !showResultModal) {
+    if (
+      gameData &&
+      gameData.status === "in_progress" &&
+      !submitting &&
+      !showResultModal
+    ) {
       setTimeLeft(30);
       if (timerRef.current) clearInterval(timerRef.current);
 
@@ -129,11 +134,11 @@ function DemoGamePage() {
     setLastResult(result);
     setShowResultModal(true);
     setGameEnded(true);
-    
+
     if (result.hand) {
-      setGameData(prevData => ({
+      setGameData((prevData) => ({
         ...prevData,
-        hand: result.hand
+        hand: result.hand,
       }));
     }
   };
@@ -179,11 +184,10 @@ function DemoGamePage() {
 
     if (hoveredPosition === cardIndex) {
       return "translateX(20px)";
-    }
-    else if (hoveredPosition === cardIndex + 1) {
+    } else if (hoveredPosition === cardIndex + 1) {
       return "translateX(-20px)";
     }
-    
+
     return "translateX(0)";
   };
 
@@ -193,13 +197,18 @@ function DemoGamePage() {
       <Container
         fluid
         className="game-container"
-        style={{ minHeight: "calc(100vh - 56px)", overflowY: "auto", paddingBottom: "20px" }}
+        style={{
+          minHeight: "calc(100vh - 56px)",
+          overflowY: "auto",
+          paddingBottom: "20px",
+        }}
       >
         {/* Demo Banner */}
         <Row className="bg-info text-white py-2">
           <Col className="text-center">
             <i className="bi bi-info-circle me-2"></i>
-            <strong>MODALITÀ DEMO</strong> - Prova il gioco con un singolo round!
+            <strong>MODALITÀ DEMO</strong> - Prova il gioco con un singolo
+            round!
           </Col>
         </Row>
 
@@ -234,10 +243,10 @@ function DemoGamePage() {
               <h5 className="mb-2">Dove si colloca questa sfortuna?</h5>
               <Card
                 className="challenge-card mx-auto shadow"
-                style={{ 
-                  maxWidth: "350px", 
+                style={{
+                  maxWidth: "350px",
                   border: "2px solid #fbbf24",
-                  minHeight: "160px"
+                  minHeight: "160px",
                 }}
               >
                 <Card.Body className="d-flex flex-column justify-content-center p-3">
@@ -250,10 +259,10 @@ function DemoGamePage() {
                   {gameData?.challengeCard?.imageUrl && (
                     <div className="text-center">
                       <img
-                        src={API.retrieveImage(gameData.challengeCard.imageUrl).image}
+                        src={`http://localhost:5000/images/${gameData?.challengeCard?.imageUrl}`}
                         alt={gameData.challengeCard.name}
                         className="img-fluid rounded"
-                        style={{ maxHeight: "80px", objectFit: "contain" }}
+                        style={{ maxHeight: "160px", objectFit: "contain" }}
                       />
                     </div>
                   )}
@@ -265,7 +274,12 @@ function DemoGamePage() {
             <div className="hand-section d-flex align-items-center justify-content-center mb-3">
               <div
                 className="position-container d-flex align-items-center"
-                style={{ gap: "10px", flexWrap: "nowrap", overflowX: "auto", padding: "10px 0" }}
+                style={{
+                  gap: "10px",
+                  flexWrap: "nowrap",
+                  overflowX: "auto",
+                  padding: "10px 0",
+                }}
               >
                 {getPositionButtons().map((pos, idx) => (
                   <React.Fragment key={`pos-${pos}`}>
@@ -323,13 +337,13 @@ function DemoGamePage() {
                               top: "8px",
                               right: "8px",
                               fontSize: "0.75rem",
-                              zIndex: 2
+                              zIndex: 2,
                             }}
                           >
                             {gameData.hand[idx].misfortuneIndex}
                           </Badge>
 
-                          <h6 
+                          <h6
                             className="card-title mb-2"
                             style={{
                               paddingRight: "35px",
@@ -338,13 +352,13 @@ function DemoGamePage() {
                               lineHeight: "1.1",
                               minHeight: "35px",
                               display: "flex",
-                              alignItems: "flex-start"
+                              alignItems: "flex-start",
                             }}
                           >
                             {gameData.hand[idx].name}
                           </h6>
 
-                          <p 
+                          <p
                             className="card-text small text-muted flex-grow-1"
                             style={{
                               fontSize: "0.75rem",
@@ -352,7 +366,7 @@ function DemoGamePage() {
                               overflow: "hidden",
                               display: "-webkit-box",
                               WebkitLineClamp: 6,
-                              WebkitBoxOrient: "vertical"
+                              WebkitBoxOrient: "vertical",
                             }}
                           >
                             {gameData.hand[idx].description}
@@ -380,7 +394,7 @@ function DemoGamePage() {
                       : "",
                   border: "none",
                   minWidth: "200px",
-                  height: "45px"
+                  height: "45px",
                 }}
               >
                 {submitting ? (
@@ -401,9 +415,9 @@ function DemoGamePage() {
       </Container>
 
       {/* Result Modal */}
-      <Modal 
-        show={showResultModal} 
-        onHide={handleCloseResultModal} 
+      <Modal
+        show={showResultModal}
+        onHide={handleCloseResultModal}
         centered
         size="lg"
         backdrop="static"
@@ -421,10 +435,10 @@ function DemoGamePage() {
           <Modal.Title>
             <i
               className={`bi bi-${
-                isTimeout 
+                isTimeout
                   ? "clock-history"
-                  : lastResult?.success 
-                  ? "check-circle" 
+                  : lastResult?.success
+                  ? "check-circle"
                   : "x-circle"
               } me-2`}
             ></i>
@@ -437,33 +451,28 @@ function DemoGamePage() {
               <>
                 <h5 className="mb-3">Il tempo è scaduto!</h5>
                 <p>Non hai fatto in tempo a posizionare la carta.</p>
-                <p>
-                  La posizione corretta era: <strong>{lastResult?.correctPosition}</strong>
-                </p>
               </>
             ) : lastResult?.success ? (
               <>
                 <h5 className="text-success mb-3">Ottimo lavoro!</h5>
                 <p>Hai indovinato la posizione corretta!</p>
+
+                <p className="mt-3">
+                  L'indice di sfortuna della carta era:{" "}
+                  <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
+                </p>
               </>
             ) : (
               <>
                 <h5 className="text-danger mb-3">Posizione sbagliata!</h5>
-                <p>
-                  La posizione corretta era: <strong>{lastResult?.correctPosition}</strong>
-                </p>
               </>
             )}
-            
-            <p className="mt-3">
-              L'indice di sfortuna della carta era:{" "}
-              <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-            </p>
           </div>
 
           <div className="alert alert-info text-center">
             <i className="bi bi-info-circle me-2"></i>
-            Questa era una partita demo. Registrati per giocare partite complete!
+            Questa era una partita demo. Registrati per giocare partite
+            complete!
           </div>
         </Modal.Body>
         <Modal.Footer>

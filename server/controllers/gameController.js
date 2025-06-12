@@ -1,10 +1,8 @@
 import * as gameDAO from "../dao/GameDAO.js";
 import * as cardDAO from "../dao/CardDAO.js";
 import * as roundDAO from "../dao/RoundDAO.js";
-import * as cardPlayedDAO from "../dao/GameCardDAO.js";
 
 export const createGame = async (req) => {
-  console.log("sessione => " + JSON.stringify(req.user));
 
   try {
     let userId;
@@ -94,8 +92,7 @@ export const submitGuess = async (req) => {
 
     const response = {
       success: !isTimeout && result.isCorrect,
-      correctPosition: result.correctPosition,
-      cardDetails: result.cardDetails,
+      cardDetails: !isTimeout && result.isCorrect? result.cardDetails : null,
       gameStatus: result.gameStatus,
       round: req.session.roundNumber,
       cardsWon: result.cardsWon,
@@ -141,7 +138,6 @@ const startNewGame = async (userId) => {
 
   for (const card of initialCards) {
     await roundDAO.saveRound(card.cardId, 0, true, game.gameId);
-    await cardPlayedDAO.saveGameCard(card.cardId, 0, game.gameId);
   }
   const challengeCard = shuffled[3];
   return {
@@ -175,7 +171,6 @@ const processGuess = async (
   let newFailedAttempts = failedAttempts;
 
   if (isCorrect) {
-    await cardPlayedDAO.saveGameCard(currentCard.cardId, roundNumber, gameId);
     updatedHand.splice(position, 0, currentCard);
     updatedHand.sort((a, b) => a.misfortuneIndex - b.misfortuneIndex);
     newCardsWon++;

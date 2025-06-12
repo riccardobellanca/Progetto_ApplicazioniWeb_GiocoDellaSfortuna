@@ -116,9 +116,7 @@ function GamePage() {
 
   const handleSubmitGuess = async () => {
     if (selectedPosition === null || submitting) return;
-
     if (timerRef.current) clearInterval(timerRef.current);
-
     const currentGameId = gameIdRef.current;
     if (!currentGameId) {
       console.error("GameId non trovato nel ref!");
@@ -277,10 +275,10 @@ function GamePage() {
                   {gameData?.challengeCard?.imageUrl && (
                     <div className="text-center">
                       <img
-                        src={gameData.challengeCard.imageUrl}
+                        src={`http://localhost:5000/images/${gameData?.challengeCard?.imageUrl}`}
                         alt={gameData.challengeCard.name}
                         className="img-fluid rounded"
-                        style={{ maxHeight: "80px", objectFit: "contain" }}
+                        style={{ maxHeight: "160px", objectFit: "contain" }}
                       />
                     </div>
                   )}
@@ -585,10 +583,6 @@ function GamePage() {
                     La posizione corretta era:{" "}
                     <strong>{lastResult?.correctPosition}</strong>
                   </p>
-                  <p>
-                    L'indice di sfortuna della carta era:{" "}
-                    <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-                  </p>
                 </div>
               ) : lastResult?.success ? (
                 <div className="text-center">
@@ -603,14 +597,6 @@ function GamePage() {
               ) : (
                 <div className="text-center">
                   <h5 className="mb-3">Posizione sbagliata!</h5>
-                  <p>
-                    La posizione corretta era:{" "}
-                    <strong>{lastResult?.correctPosition}</strong>
-                  </p>
-                  <p>
-                    L'indice di sfortuna era:{" "}
-                    <strong>{lastResult?.cardDetails?.misfortuneIndex}</strong>
-                  </p>
                 </div>
               )}
             </>

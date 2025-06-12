@@ -51,10 +51,10 @@ export const API = {
     });
   },
 
-  register: async (username, password) => {
+  register: async (username, password, confirmPassword) => {
     return handleApiCall(SERVER_URL + "/auth/register", {
       method: "POST",
-      body: JSON.stringify({ username, password }),
+      body: JSON.stringify({ username, password, confirmPassword }),
     });
   },
 

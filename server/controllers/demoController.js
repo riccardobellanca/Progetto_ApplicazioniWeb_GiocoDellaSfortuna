@@ -66,8 +66,7 @@ export const submitDemoGuess = async (req) => {
 
     const response = {
       success: !isTimeout && result.isCorrect,
-      correctPosition: result.correctPosition,
-      cardDetails: result.cardDetails,
+      cardDetails: !isTimeout && result.isCorrect? result.cardDetails : null,
       gameStatus: result.isCorrect ? "won" : "lost",
       round: 1,
       cardsWon: result.isCorrect ? 4 : 0,
