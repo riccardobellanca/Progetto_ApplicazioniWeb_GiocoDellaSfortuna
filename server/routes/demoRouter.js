@@ -9,9 +9,9 @@ const validateGuess = [
   body("position")
     .notEmpty()
     .withMessage("Position è richiesta")
-    .isInt({ min: 0, max: 6 })
+    .isInt({ min: -1, max: 6 })
     .withMessage(
-      "Position deve essere un intero con valore compreso fra 0 e 6"
+      "Position deve essere un intero con valore compreso fra -1 e 6"
     ),
 ];
 

@@ -88,7 +88,6 @@ function DemoGamePage() {
 
   const handleTimeout = async () => {
     if (timerRef.current) clearInterval(timerRef.current);
-
     const currentGameId = gameIdRef.current;
     if (!currentGameId) {
       console.error("GameId non trovato!");
@@ -253,9 +252,6 @@ function DemoGamePage() {
                   <h6 className="card-title mb-2">
                     {gameData?.challengeCard?.name}
                   </h6>
-                  <p className="card-text text-muted mb-2 small">
-                    {gameData?.challengeCard?.description}
-                  </p>
                   {gameData?.challengeCard?.imageUrl && (
                     <div className="text-center">
                       <img
@@ -316,14 +312,16 @@ function DemoGamePage() {
                       <Card
                         className="hand-card shadow flex-shrink-0"
                         style={{
-                          width: "140px",
+                          width: "130px",
                           height: "180px",
                           transition: "transform 0.3s ease",
                           transform: getCardTransform(idx),
                           position: "relative",
+                          borderRadius: "12px",
                         }}
                       >
-                        <Card.Body className="p-2 d-flex flex-column position-relative">
+                        <Card.Body className="p-2 d-flex flex-column align-items-center justify-content-between">
+                          {/* Misfortune index sopra */}
                           <Badge
                             bg={
                               gameData.hand[idx].misfortuneIndex >= 70
@@ -332,45 +330,42 @@ function DemoGamePage() {
                                 ? "warning"
                                 : "success"
                             }
-                            className="position-absolute"
                             style={{
-                              top: "8px",
-                              right: "8px",
                               fontSize: "0.75rem",
-                              zIndex: 2,
+                              fontWeight: "600",
+                              borderRadius: "8px",
                             }}
                           >
                             {gameData.hand[idx].misfortuneIndex}
                           </Badge>
 
+                          {/* Immagine della carta */}
+                          <div className="text-center my-1">
+                            <img
+                              src={`http://localhost:5000/images/${gameData.hand[idx].imageUrl}`}
+                              alt={gameData.hand[idx].name}
+                              className="img-fluid rounded"
+                              style={{
+                                maxHeight: "80px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
+
+                          {/* Nome della carta */}
                           <h6
-                            className="card-title mb-2"
+                            className="text-center fw-semibold mb-1"
                             style={{
-                              paddingRight: "35px",
-                              fontSize: "0.85rem",
-                              fontWeight: "600",
-                              lineHeight: "1.1",
-                              minHeight: "35px",
-                              display: "flex",
-                              alignItems: "flex-start",
+                              fontSize: "0.75rem",
+                              color: "#2c3e50",
+                              lineHeight: "1.2",
+                              textAlign: "center",
+                              minHeight: "32px",
                             }}
                           >
                             {gameData.hand[idx].name}
                           </h6>
 
-                          <p
-                            className="card-text small text-muted flex-grow-1"
-                            style={{
-                              fontSize: "0.75rem",
-                              lineHeight: "1.2",
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 6,
-                              WebkitBoxOrient: "vertical",
-                            }}
-                          >
-                            {gameData.hand[idx].description}
-                          </p>
                         </Card.Body>
                       </Card>
                     )}

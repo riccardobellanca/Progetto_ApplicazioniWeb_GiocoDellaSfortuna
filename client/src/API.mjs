@@ -14,6 +14,7 @@ export class ApiError extends Error {
 
 const handleApiCall = async (url, options = {}) => {
   
+  /*
   console.group(`${options.method} ${url}`);
   console.log("Body:", JSON.stringify(options.body, null, 2));
   console.log("Headers:", {
@@ -23,6 +24,7 @@ const handleApiCall = async (url, options = {}) => {
   });
   console.log("Full Options:", JSON.stringify(options, null, 2));
   console.groupEnd();
+  */
 
   const response = await fetch(url, {
     credentials: "include",
@@ -105,12 +107,6 @@ export const API = {
     return handleApiCall(SERVER_URL + "/demo/guess", {
       method: "POST",
       body: JSON.stringify({ gameId, position }),
-    });
-  },
-
-  retrieveImage: (imageName) => {
-    return handleApiCall(SERVER_URL + `/images/${imageName}`, {
-      method: "GET",
     });
   },
 };

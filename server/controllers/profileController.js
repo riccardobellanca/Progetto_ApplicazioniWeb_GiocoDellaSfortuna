@@ -45,7 +45,7 @@ export const getProfileInfo = async (profileId) => {
         error.code !== undefined
           ? error
           : {
-              code: 500,
+              code: 404,
               message: "Impossibile trovare le informazioni del profilo",
             },
     };
@@ -69,7 +69,6 @@ export const getProfileHistory = async (userId) => {
           playedAt: round.playedAt,
           card: {
             name: card.name,
-            description: card.description,
           }
         });
       }

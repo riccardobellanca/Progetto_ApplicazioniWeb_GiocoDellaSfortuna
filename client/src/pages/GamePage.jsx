@@ -27,7 +27,6 @@ function GamePage() {
   const [gameEnded, setGameEnded] = useState(false);
   const [isTimeout, setIsTimeout] = useState(false);
 
-
   const { showError, showSuccess } = useToast();
   const navigate = useNavigate();
   const timerRef = useRef(null);
@@ -52,7 +51,12 @@ function GamePage() {
   }, [gameData?.gameId]);
 
   useEffect(() => {
-    if (gameData && gameData.status === "in_progress" && !submitting && !showResultModal) {
+    if (
+      gameData &&
+      gameData.status === "in_progress" &&
+      !submitting &&
+      !showResultModal
+    ) {
       setTimeLeft(30);
       if (timerRef.current) clearInterval(timerRef.current);
 
@@ -142,7 +146,7 @@ function GamePage() {
     if (result.gameStatus === "won" || result.gameStatus === "lost") {
       setGameEnded(true);
     } else {
-      setGameData(prevData => ({
+      setGameData((prevData) => ({
         ...prevData,
         round: result.round,
         cardsWon: result.cardsWon,
@@ -158,7 +162,7 @@ function GamePage() {
 
   const handleCloseResultModal = () => {
     setShowResultModal(false);
-    
+
     if (!gameEnded) {
       setLastResult(null);
       setIsTimeout(false);
@@ -204,11 +208,10 @@ function GamePage() {
 
     if (hoveredPosition === cardIndex) {
       return "translateX(20px)";
-    }
-    else if (hoveredPosition === cardIndex + 1) {
+    } else if (hoveredPosition === cardIndex + 1) {
       return "translateX(-20px)";
     }
-    
+
     return "translateX(0)";
   };
 
@@ -218,7 +221,11 @@ function GamePage() {
       <Container
         fluid
         className="game-container"
-        style={{ minHeight: "calc(100vh - 56px)", overflowY: "auto", paddingBottom: "20px" }}
+        style={{
+          minHeight: "calc(100vh - 56px)",
+          overflowY: "auto",
+          paddingBottom: "20px",
+        }}
       >
         {/* Stats Bar */}
         <Row
@@ -259,19 +266,16 @@ function GamePage() {
               <h5 className="mb-2">Dove si colloca questa sfortuna?</h5>
               <Card
                 className="challenge-card mx-auto shadow"
-                style={{ 
-                  maxWidth: "350px", 
+                style={{
+                  maxWidth: "350px",
                   border: "2px solid #fbbf24",
-                  minHeight: "160px"
+                  minHeight: "160px",
                 }}
               >
                 <Card.Body className="d-flex flex-column justify-content-center p-3">
                   <h6 className="card-title mb-2">
                     {gameData?.challengeCard?.name}
                   </h6>
-                  <p className="card-text text-muted mb-2 small">
-                    {gameData?.challengeCard?.description}
-                  </p>
                   {gameData?.challengeCard?.imageUrl && (
                     <div className="text-center">
                       <img
@@ -290,7 +294,12 @@ function GamePage() {
             <div className="hand-section d-flex align-items-center justify-content-center mb-3">
               <div
                 className="position-container d-flex align-items-center"
-                style={{ gap: "10px", flexWrap: "nowrap", overflowX: "auto", padding: "10px 0" }}
+                style={{
+                  gap: "10px",
+                  flexWrap: "nowrap",
+                  overflowX: "auto",
+                  padding: "10px 0",
+                }}
               >
                 {getPositionButtons().map((pos, idx) => (
                   <React.Fragment key={`pos-${pos}`}>
@@ -327,14 +336,16 @@ function GamePage() {
                       <Card
                         className="hand-card shadow flex-shrink-0"
                         style={{
-                          width: "140px",
+                          width: "130px",
                           height: "180px",
                           transition: "transform 0.3s ease",
                           transform: getCardTransform(idx),
                           position: "relative",
+                          borderRadius: "12px",
                         }}
                       >
-                        <Card.Body className="p-2 d-flex flex-column position-relative">
+                        <Card.Body className="p-2 d-flex flex-column align-items-center justify-content-between">
+                          {/* Misfortune index sopra */}
                           <Badge
                             bg={
                               gameData.hand[idx].misfortuneIndex >= 70
@@ -343,45 +354,41 @@ function GamePage() {
                                 ? "warning"
                                 : "success"
                             }
-                            className="position-absolute"
                             style={{
-                              top: "8px",
-                              right: "8px",
                               fontSize: "0.75rem",
-                              zIndex: 2
+                              fontWeight: "600",
+                              borderRadius: "8px",
                             }}
                           >
                             {gameData.hand[idx].misfortuneIndex}
                           </Badge>
 
-                          <h6 
-                            className="card-title mb-2"
+                          {/* Immagine della carta */}
+                          <div className="text-center my-1">
+                            <img
+                              src={`http://localhost:5000/images/${gameData.hand[idx].imageUrl}`}
+                              alt={gameData.hand[idx].name}
+                              className="img-fluid rounded"
+                              style={{
+                                maxHeight: "80px",
+                                objectFit: "contain",
+                              }}
+                            />
+                          </div>
+
+                          {/* Nome della carta */}
+                          <h6
+                            className="text-center fw-semibold mb-1"
                             style={{
-                              paddingRight: "35px",
-                              fontSize: "0.85rem",
-                              fontWeight: "600",
-                              lineHeight: "1.1",
-                              minHeight: "35px",
-                              display: "flex",
-                              alignItems: "flex-start"
+                              fontSize: "0.75rem",
+                              color: "#2c3e50",
+                              lineHeight: "1.2",
+                              textAlign: "center",
+                              minHeight: "32px",
                             }}
                           >
                             {gameData.hand[idx].name}
                           </h6>
-
-                          <p 
-                            className="card-text small text-muted flex-grow-1"
-                            style={{
-                              fontSize: "0.75rem",
-                              lineHeight: "1.2",
-                              overflow: "hidden",
-                              display: "-webkit-box",
-                              WebkitLineClamp: 6,
-                              WebkitBoxOrient: "vertical"
-                            }}
-                          >
-                            {gameData.hand[idx].description}
-                          </p>
                         </Card.Body>
                       </Card>
                     )}
@@ -405,7 +412,7 @@ function GamePage() {
                       : "",
                   border: "none",
                   minWidth: "200px",
-                  height: "45px"
+                  height: "45px",
                 }}
               >
                 {submitting ? (
@@ -426,9 +433,9 @@ function GamePage() {
       </Container>
 
       {/* Result Modal */}
-      <Modal 
-        show={showResultModal} 
-        onHide={handleCloseResultModal} 
+      <Modal
+        show={showResultModal}
+        onHide={handleCloseResultModal}
         centered
         size={gameEnded ? "lg" : "md"}
         backdrop="static"
@@ -454,21 +461,21 @@ function GamePage() {
                   ? lastResult?.gameStatus === "won"
                     ? "trophy-fill"
                     : "x-octagon-fill"
-                  : isTimeout 
+                  : isTimeout
                   ? "clock-history"
-                  : lastResult?.success 
-                  ? "check-circle" 
+                  : lastResult?.success
+                  ? "check-circle"
                   : "x-circle"
               } me-2`}
             ></i>
-            {gameEnded 
-              ? lastResult?.gameStatus === "won" 
-                ? "Hai Vinto!" 
+            {gameEnded
+              ? lastResult?.gameStatus === "won"
+                ? "Hai Vinto!"
                 : "Hai Perso!"
-              : isTimeout 
-              ? "Tempo Scaduto!" 
-              : lastResult?.success 
-              ? "Ottimo!" 
+              : isTimeout
+              ? "Tempo Scaduto!"
+              : lastResult?.success
+              ? "Ottimo!"
               : "Peccato!"}
           </Modal.Title>
         </Modal.Header>
@@ -480,12 +487,18 @@ function GamePage() {
                 {lastResult?.gameStatus === "won" ? (
                   <>
                     <h4 className="text-success">Complimenti!</h4>
-                    <p className="lead">Hai completato la partita vincendo {lastResult?.cardsWon || 0} carte!</p>
+                    <p className="lead">
+                      Hai completato la partita vincendo{" "}
+                      {lastResult?.cardsWon || 0} carte!
+                    </p>
                   </>
                 ) : (
                   <>
                     <h4 className="text-danger">Partita Terminata</h4>
-                    <p className="lead">Hai commesso 3 errori. Hai comunque collezionato {lastResult?.cardsWon || 0} carte!</p>
+                    <p className="lead">
+                      Hai commesso 3 errori. Hai comunque collezionato{" "}
+                      {lastResult?.cardsWon || 0} carte!
+                    </p>
                   </>
                 )}
               </div>
@@ -494,74 +507,123 @@ function GamePage() {
               {gameData?.hand && gameData.hand.length > 0 && (
                 <div>
                   <h5 className="mb-3 text-center">
-                    {lastResult?.gameStatus === "won" 
-                      ? "Riepilogo delle carte vinte:" 
+                    {lastResult?.gameStatus === "won"
+                      ? "Riepilogo delle carte vinte:"
                       : "Carte collezionate prima della sconfitta:"}
                   </h5>
+
                   <Row className="g-3">
                     {/* Mostra le carte in mano */}
                     {gameData.hand.map((card, index) => (
                       <Col key={`hand-${index}`} xs={12} sm={6} md={4}>
                         <Card className="h-100 shadow-sm">
-                          <Card.Body className="p-3">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                              <h6 className="card-title mb-0" style={{ fontSize: "0.9rem", flex: 1 }}>
-                                {card.name}
-                              </h6>
-                              <Badge
-                                bg={
-                                  card.misfortuneIndex >= 70
-                                    ? "danger"
-                                    : card.misfortuneIndex >= 40
-                                    ? "warning"
-                                    : "success"
-                                }
-                                className="ms-2"
-                              >
-                                {card.misfortuneIndex}
-                              </Badge>
+                          <Card.Body className="p-3 d-flex flex-column align-items-center justify-content-between">
+                            {/* Misfortune index sopra */}
+                            <Badge
+                              bg={
+                                card.misfortuneIndex >= 70
+                                  ? "danger"
+                                  : card.misfortuneIndex >= 40
+                                  ? "warning"
+                                  : "success"
+                              }
+                              style={{
+                                fontSize: "0.75rem",
+                                fontWeight: "600",
+                                borderRadius: "8px",
+                              }}
+                            >
+                              {card.misfortuneIndex}
+                            </Badge>
+
+                            {/* Immagine carta */}
+                            <div className="my-2 text-center">
+                              <img
+                                src={`http://localhost:5000/images/${card.imageUrl}`}
+                                alt={card.name}
+                                className="img-fluid rounded"
+                                style={{
+                                  maxHeight: "100px",
+                                  objectFit: "contain",
+                                }}
+                              />
                             </div>
-                            <p className="card-text small text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                              {card.description}
-                            </p>
+
+                            {/* Nome carta */}
+                            <h6
+                              className="text-center fw-semibold mb-1"
+                              style={{
+                                fontSize: "0.75rem",
+                                color: "#2c3e50",
+                                lineHeight: "1.2",
+                                minHeight: "32px",
+                              }}
+                            >
+                              {card.name}
+                            </h6>
                           </Card.Body>
                         </Card>
                       </Col>
                     ))}
-                    
+
                     {/* Mostra la challenge card finale solo se ha vinto */}
-                    {lastResult?.gameStatus === "won" && lastResult?.cardDetails && (
-                      <Col xs={12} sm={6} md={4}>
-                        <Card className="h-100 shadow-sm border-warning">
-                          <Card.Body className="p-3">
-                            <div className="d-flex justify-content-between align-items-start mb-2">
-                              <h6 className="card-title mb-0" style={{ fontSize: "0.9rem", flex: 1 }}>
-                                {lastResult.cardDetails.name}
-                              </h6>
+                    {lastResult?.gameStatus === "won" &&
+                      lastResult?.cardDetails && (
+                        <Col xs={12} sm={6} md={4}>
+                          <Card className="h-100 shadow-sm border-warning">
+                            <Card.Body className="p-3 d-flex flex-column align-items-center justify-content-between">
+                              {/* Misfortune sopra */}
                               <Badge
                                 bg={
                                   lastResult.cardDetails.misfortuneIndex >= 70
                                     ? "danger"
-                                    : lastResult.cardDetails.misfortuneIndex >= 40
+                                    : lastResult.cardDetails.misfortuneIndex >=
+                                      40
                                     ? "warning"
                                     : "success"
                                 }
-                                className="ms-2"
+                                style={{
+                                  fontSize: "0.75rem",
+                                  fontWeight: "600",
+                                  borderRadius: "8px",
+                                }}
                               >
                                 {lastResult.cardDetails.misfortuneIndex}
                               </Badge>
-                            </div>
-                            <p className="card-text small text-muted mb-0" style={{ fontSize: "0.8rem" }}>
-                              {lastResult.cardDetails.description}
-                            </p>
-                          </Card.Body>
-                        </Card>
-                      </Col>
-                    )}
+
+                              {/* Immagine carta */}
+                              <div className="my-2 text-center">
+                                <img
+                                  src={`http://localhost:5000/images/${lastResult.cardDetails.imageUrl}`}
+                                  alt={lastResult.cardDetails.name}
+                                  className="img-fluid rounded"
+                                  style={{
+                                    maxHeight: "100px",
+                                    objectFit: "contain",
+                                  }}
+                                />
+                              </div>
+
+                              {/* Nome carta */}
+                              <h6
+                                className="text-center fw-semibold mb-1"
+                                style={{
+                                  fontSize: "0.75rem",
+                                  color: "#2c3e50",
+                                  lineHeight: "1.2",
+                                  minHeight: "32px",
+                                }}
+                              >
+                                {lastResult.cardDetails.name}
+                              </h6>
+                            </Card.Body>
+                          </Card>
+                        </Col>
+                      )}
                   </Row>
                 </div>
               )}
-              
+
               {/* Messaggio se non ci sono carte */}
               {(!gameData?.hand || gameData.hand.length === 0) && (
                 <div className="text-center text-muted py-4">
@@ -576,9 +638,7 @@ function GamePage() {
               {isTimeout ? (
                 <div className="text-center">
                   <h5 className="mb-3">Il tempo è scaduto!</h5>
-                  <p>
-                    Non hai fatto in tempo a posizionare la carta.
-                  </p>
+                  <p>Non hai fatto in tempo a posizionare la carta.</p>
                   <p>
                     La posizione corretta era:{" "}
                     <strong>{lastResult?.correctPosition}</strong>

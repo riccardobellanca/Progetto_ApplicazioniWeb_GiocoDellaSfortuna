@@ -42,7 +42,8 @@ function ProfilePage() {
         setError(null);
       } catch (err) {
         if (err.code === 500) {
-          const mes = error instanceof ApiError ? error.getMessage() : error.message;
+          const mes =
+            error instanceof ApiError ? error.getMessage() : error.message;
           showError(mes);
         } else redirectTo(err.code);
       } finally {
@@ -55,7 +56,7 @@ function ProfilePage() {
 
   const fetchGameHistory = async () => {
     if (gameHistory.length > 0) return; // Già caricata
-    
+
     try {
       setHistoryLoading(true);
       const data = await API.getProfileHistory(profileId);
@@ -284,16 +285,19 @@ function ProfilePage() {
         </Row>
 
         {/* Sezione Cronologia Partite */}
-        <Card className="shadow border-0" style={{ marginBottom: showHistory ? "4rem" : "1rem" }}>
+        <Card
+          className="shadow border-0"
+          style={{ marginBottom: showHistory ? "4rem" : "1rem" }}
+        >
           <Card.Header className="bg-white border-0">
             <Button
               variant="outline-primary"
               onClick={handleToggleHistory}
               className="w-100 d-flex align-items-center justify-content-between py-3"
-              style={{ 
-                border: "none", 
+              style={{
+                border: "none",
                 background: "none",
-                color: "inherit"
+                color: "inherit",
               }}
               onMouseEnter={(e) => {
                 e.target.style.color = "inherit";
@@ -308,13 +312,17 @@ function ProfilePage() {
                 <i className="bi bi-clock-history me-2"></i>
                 <strong>Cronologia Partite</strong>
               </span>
-              <i 
-                className={`bi bi-chevron-${showHistory ? 'up' : 'down'}`}
-                style={{ fontSize: "1.5rem", color: "#0d6efd", fontWeight: "bold" }}
+              <i
+                className={`bi bi-chevron-${showHistory ? "up" : "down"}`}
+                style={{
+                  fontSize: "1.5rem",
+                  color: "#0d6efd",
+                  fontWeight: "bold",
+                }}
               ></i>
             </Button>
           </Card.Header>
-          
+
           <Collapse in={showHistory}>
             <div>
               <Card.Body className="p-0" style={{ paddingBottom: "2rem" }}>
@@ -332,7 +340,10 @@ function ProfilePage() {
                   <div style={{ padding: "1rem" }}>
                     <Accordion flush>
                       {gameHistory.map((game, gameIndex) => (
-                        <Accordion.Item key={game.gameId} eventKey={gameIndex.toString()}>
+                        <Accordion.Item
+                          key={game.gameId}
+                          eventKey={gameIndex.toString()}
+                        >
                           <Accordion.Header>
                             <div className="d-flex align-items-center justify-content-between w-100 me-3">
                               <div className="d-flex align-items-center">
@@ -346,60 +357,100 @@ function ProfilePage() {
                                 </div>
                               </div>
                               <div className="text-end">
-                                <Badge 
-                                  bg={game.status === 'completed' ? 'success' : 'secondary'}
+                                <Badge
+                                  bg={
+                                    game.status === "won"
+                                      ? "success"
+                                      : "secondary"
+                                  }
                                   className="mb-1"
                                 >
-                                  {game.status === 'completed' ? 'Completata' : 'In corso'}
+                                  {game.status === "won" ? "Vinta" : "Persa"}
                                 </Badge>
                                 <br />
                                 <small className="text-muted">
                                   <span className="text-success me-2">
-                                    <i className="bi bi-trophy"></i> {game.totalCardsWon}
+                                    <i className="bi bi-trophy"></i>{" "}
+                                    {game.totalCardsWon}
                                   </span>
                                   <span className="text-danger">
-                                    <i className="bi bi-x-circle"></i> {game.totalCardsLost}
+                                    <i className="bi bi-x-circle"></i>{" "}
+                                    {game.totalCardsLost}
                                   </span>
                                 </small>
                               </div>
                             </div>
                           </Accordion.Header>
-                          <Accordion.Body className="bg-light" style={{ paddingBottom: "2rem" }}>
-                            <h6 className="mb-3">
-                              <i className="bi bi-list-ol me-2"></i>
-                              Round della partita ({game.rounds.length} round)
-                            </h6>
+                          <Accordion.Body
+                            className="bg-light"
+                            style={{ paddingBottom: "2rem" }}
+                          >
                             <Row className="g-3">
                               {game.rounds.map((round, roundIndex) => (
                                 <Col key={roundIndex} lg={6} xl={4}>
-                                  <Card 
+                                  <Card
                                     className={`h-100 border-0 shadow-sm ${
-                                      round.isWon ? 'border-success' : 'border-danger'
+                                      round.isWon
+                                        ? "border-success"
+                                        : "border-danger"
                                     }`}
                                     style={{
-                                      borderLeft: `4px solid ${round.isWon ? '#22c55e' : '#ef4444'} !important`
+                                      borderLeft: `4px solid ${
+                                        round.isWon ? "#22c55e" : "#ef4444"
+                                      } !important`,
                                     }}
                                   >
-                                    <Card.Body className="p-3">
-                                      <div className="d-flex align-items-center justify-content-between mb-2">
-                                        <Badge 
-                                          bg={'black'}
-                                          className="px-2 py-1"
-                                        >
-                                          Round {round.roundNumber}
-                                        </Badge>
-                                      </div>
-                                      <h6 className="mb-2 text-center">{round.card.name}</h6>
-                                      <p className="small text-muted mb-2 text-center">
-                                        {round.card.description}
-                                      </p>
-                                      
+                                    <Card.Body className="p-3 d-flex flex-column align-items-center justify-content-between">
+                                      <Badge
+                                        variant="outline"
+                                        className="px-3 py-1.5 border-gray-300 bg-white text-black text-base mb-2"
+                                      >
+                                        Round {round.roundNumber}
+                                      </Badge>
+
+                                      {/* Immagine della carta */}
+                                      {round.card.imageUrl && (
+                                        <img
+                                          src={`http://localhost:5000/images/${round.card.imageUrl}`}
+                                          alt={round.card.name}
+                                          style={{
+                                            maxHeight: "100px",
+                                            objectFit: "contain",
+                                          }}
+                                        />
+                                      )}
+
+                                      {/* Nome carta */}
+                                      <h6 className="text-center mb-2">
+                                        {round.card.name}
+                                      </h6>
+
+                                      {/* Esito del round */}
                                       <div className="text-center">
-                                        <div className={`badge ${round.isWon ? 'bg-success' : 'bg-danger'} mb-1`}>
-                                          <i className={`bi bi-${round.isWon ? 'check-circle' : 'x-circle'} me-1`}></i>
-                                          {round.isWon ? 'Vinto' : 'Perso'}
+                                        <div
+                                          className={`badge mb-1 ${
+                                            round.roundNumber === 0
+                                              ? "bg-secondary text-white" // neutro (grigio)
+                                              : round.isWon
+                                              ? "bg-success"
+                                              : "bg-danger"
+                                          }`}
+                                        >
+                                          <i
+                                            className={`bi me-1 ${
+                                              round.roundNumber === 0
+                                                ? "bi-hand" // icona mano
+                                                : round.isWon
+                                                ? "bi-check-circle"
+                                                : "bi-x-circle"
+                                            }`}
+                                          ></i>
+                                          {round.roundNumber === 0
+                                            ? "In mano"
+                                            : round.isWon
+                                            ? "Vinta"
+                                            : "Persa"}
                                         </div>
-                                        <br />
                                       </div>
                                     </Card.Body>
                                   </Card>

@@ -3,10 +3,11 @@ import * as cardDAO from "../dao/CardDAO.js";
 export const createDemo = async (req) => {
   try {
     const demoData = await startNewDemo();
+
+    console.log("req.session submitGuess => " + JSON.stringify(req.session,null,2));
     
     req.session.demoCard = demoData.challengeCardFull;
     req.session.demoHand = demoData.initialCards;
-    req.session.demoStartTime = Date.now();
 
     return {
       success: true,
@@ -36,33 +37,25 @@ export const submitDemoGuess = async (req) => {
   try {
     const { position } = req.body;
 
+    console.log("req.session submitGuess => " + JSON.stringify(req.session,null,2));
+
     if (!req.session.demoCard || !req.session.demoHand) {
       throw new Error("Sessione demo non valida");
     }
 
-    const currentTime = Date.now();
-    const timeElapsed = currentTime - req.session.demoStartTime;
-    const MAX_TIME_MS = 30000;
-    const GRACE_PERIOD_MS = 1000;
-
     let actualPosition = position;
     let isTimeout = position === -1;
-    
-    if (timeElapsed > MAX_TIME_MS + GRACE_PERIOD_MS && position !== -1) {
-      actualPosition = -1;
-      isTimeout = true;
-    }
 
-    const result = processDemoGuess(
+    const result = await processDemoGuess(
       req.session.demoCard,
       actualPosition,
       req.session.demoHand,
       isTimeout
     );
 
-    delete req.session.demoCard;
+    /*delete req.session.demoCard;
     delete req.session.demoHand;
-    delete req.session.demoStartTime;
+    */
 
     const response = {
       success: !isTimeout && result.isCorrect,
@@ -111,7 +104,7 @@ const startNewDemo = async () => {
   };
 };
 
-const processDemoGuess = (currentCard, position, playerCards, isTimeout) => {
+const processDemoGuess = async (currentCard, position, playerCards, isTimeout) => {
 
   const correctPosition = findCorrectPosition(
     playerCards,
@@ -146,6 +139,5 @@ const findCorrectPosition = (cards, misfortuneIndex) => {
 const removeIndex = (card) => ({
   id: card.cardId,
   name: card.name,
-  description: card.description,
   imageUrl: card.imageUrl,
 });

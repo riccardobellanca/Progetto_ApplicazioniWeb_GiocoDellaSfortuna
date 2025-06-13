@@ -39,7 +39,7 @@ export const login = async (req, res, next) => {
     passport.authenticate("local", (err, user, info) => {
       if (err) return reject(err);
       if (!user)
-        return resolve({ success: false, data: { code: 401, message: info } });
+        return resolve({ success: false, data: { code: 500, message: info } });
 
       req.login(user, (err) => {
         if (err) {
@@ -71,7 +71,7 @@ export const requireOwnership = (req, res, next) => {
 export const checkValidation = (req, res, next) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(422).json({
+    return res.status(400).json({
       error: errors
         .array()
         .map((e) => e.msg)

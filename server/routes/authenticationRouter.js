@@ -113,7 +113,6 @@ router.get("/session", requireAuth, (req, res) => {
       user: {
         id: req.user.id,
         username: req.user.username,
-        // Aggiungi altri campi se necessari, ma mai la password
       }
     },
   };
