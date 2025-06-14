@@ -50,31 +50,42 @@ function GamePage() {
     }
   }, [gameData?.gameId]);
 
-  useEffect(() => {
-    if (
-      gameData &&
-      gameData.status === "in_progress" &&
-      !submitting &&
-      !showResultModal
-    ) {
-      setTimeLeft(30);
-      if (timerRef.current) clearInterval(timerRef.current);
+const timeoutHandledRef = useRef(false);
 
-      timerRef.current = setInterval(() => {
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
+useEffect(() => {
+  if (
+    gameData &&
+    gameData.status === "in_progress" &&
+    !submitting &&
+    !showResultModal
+  ) {
+    setTimeLeft(30);
+    timeoutHandledRef.current = false; // Reset del flag
+    if (timerRef.current) clearInterval(timerRef.current);
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (!timeoutHandledRef.current) {
+            timeoutHandledRef.current = true;
+            clearInterval(timerRef.current);
+            timerRef.current = null;
             handleTimeout();
-            return 0;
           }
-          return prev - 1;
-        });
-      }, 1000);
-    }
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }
 
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [gameData?.round, submitting, showResultModal]);
+  return () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+}, [gameData?.round, submitting, showResultModal]);
 
   const startNewGame = async () => {
     try {

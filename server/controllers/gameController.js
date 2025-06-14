@@ -3,22 +3,10 @@ import * as cardDAO from "../dao/CardDAO.js";
 import * as roundDAO from "../dao/RoundDAO.js";
 
 export const createGame = async (req) => {
-
   try {
-    let userId;
-    if (req.user.userId !== undefined) {
-      userId = req.user.userId;
-    } else {
-      throw new Error("Utente non valido");
-    }
-    const gameData = await startNewGame(userId);
-
+    const gameData = await startNewGame(req.user.userId);
     req.session.gameId = gameData.gameId;
-    req.session.currentCard = gameData.currentCard;
-    req.session.roundNumber = 1;
-    req.session.failedAttempts = 0;
-    req.session.cardsWon = 0;
-    req.session.playerCards = gameData.initialCards;
+    req.session.cardId = gameData.challengeCard.cardId;
 
     return {
       success: true,
@@ -34,74 +22,12 @@ export const createGame = async (req) => {
     };
   } catch (error) {
     return {
-      success : false,
-      data : {
-        code : error.code,
-        message : error.message
-      }
-    }
-  }
-};
-
-export const submitGuess = async (req) => {
-  try {
-    const { position } = req.body;
-
-    let actualPosition = position;
-    let isTimeout = position === -1;
-    
-    const result = await processGuess(
-      req.session.gameId,
-      req.session.currentCard,
-      actualPosition,
-      req.session.roundNumber,
-      req.session.playerCards,
-      req.session.failedAttempts,
-      req.session.cardsWon,
-      isTimeout
-    );
-
-    req.session.roundNumber++;
-    req.session.failedAttempts = result.failedAttempts;
-    req.session.cardsWon = result.cardsWon;
-
-    if (result.isCorrect && !isTimeout) {
-      req.session.playerCards = result.updatedHand;
-    }
-
-    const response = {
-      success: !isTimeout && result.isCorrect,
-      cardDetails: !isTimeout && result.isCorrect? result.cardDetails : null,
-      gameStatus: result.gameStatus,
-      round: req.session.roundNumber,
-      cardsWon: result.cardsWon,
-      cardsLost: result.failedAttempts,
+      success: false,
+      data: {
+        code: error.code,
+        message: error.message,
+      },
     };
-
-    if (result.gameStatus === "in_progress") {
-      req.session.currentCard = result.nextCard;
-      
-      if (result.isCorrect && !isTimeout) {
-        response.hand = result.updatedHand;
-      } else {
-        response.hand = req.session.playerCards;
-      }
-      response.nextChallengeCard = removeIndex(result.nextCard);
-    }
-    
-    return {
-      success : true,
-      data : response
-    };
-  } catch (error) {
-    console.error("Errore in submitGuess:", error);
-    return {
-      success : false,
-      data : {
-        code : error.code || 500,
-        message : error.message
-      }
-    }
   }
 };
 
@@ -116,12 +42,100 @@ const startNewGame = async (userId) => {
   for (const card of initialCards) {
     await roundDAO.saveRound(card.cardId, 0, true, game.gameId);
   }
+
   const challengeCard = shuffled[3];
+
   return {
     gameId: game.gameId,
     initialCards,
-    currentCard: challengeCard,
     challengeCard: removeIndex(challengeCard),
+  };
+};
+
+export const submitGuess = async (req) => {
+  try {
+    const { position } = req.body;
+    const gameId = req.session.gameId;
+    let cardId = req.session.cardId;
+
+    // Recupera lo stato corrente del gioco dal database
+    const gameState = await getGameState(gameId, cardId);
+
+    let isTimeout = position === -1;
+
+    const result = await processGuess(
+      gameId,
+      gameState.currentCard,
+      position,
+      gameState.roundNumber,
+      gameState.playerCards,
+      gameState.failedAttempts,
+      gameState.cardsWon,
+      isTimeout
+    );
+
+    req.session.cardId =
+      result.nextCard !== null ? result.nextCard.cardId : null;
+    let nextChallengeCard =
+      result.nextCard !== null ? removeIndex(result.nextCard) : null;
+
+    return {
+      success: true,
+      data: {
+        success: !isTimeout && result.isCorrect,
+        cardDetails: !isTimeout && result.isCorrect ? result.cardDetails : null,
+        gameStatus: result.gameStatus,
+        round: result.newRoundNumber,
+        cardsWon: result.cardsWon,
+        cardsLost: result.failedAttempts,
+        hand: !isTimeout && result.isCorrect? result.updatedHand : gameState.playerCards,
+        nextChallengeCard: nextChallengeCard,
+      },
+    };
+  } catch (error) {
+    console.error("Errore in submitGuess:", error);
+    return {
+      success: false,
+      data: {
+        code: error.code || 500,
+        message: error.message,
+      },
+    };
+  }
+};
+
+const getGameState = async (gameId, cardId) => {
+  // Trova le info di tutti i round della partita
+  const rounds = await roundDAO.getAllRoundsByGameId(gameId);
+
+  // Trova le carte nella mano del giocatore
+  const cardIds = rounds.filter((r) => r.isWon).map((r) => r.cardId);
+  const playerCards = await Promise.all(
+    cardIds.map((cardId) => cardDAO.getCardByCardId(cardId))
+  );
+  playerCards.sort((a, b) => a.misfortuneIndex - b.misfortuneIndex);
+
+  console.log(
+    "playerCards sorted => " + playerCards.map((card) => card.cardId)
+  );
+
+  // Calcola statistiche dai round
+  const roundNumber = rounds.filter((r) => r.roundNumber > 0).length + 1;
+  const failedAttempts = rounds.filter((r) => !r.isWon).length;
+  const cardsWon = rounds.filter((r) => r.isWon).length;
+  const status =
+    cardsWon === 6 ? "won" : failedAttempts === 3 ? "lost" : "in_progress";
+
+  // Trova la carta corrente da indovinare
+  const currentCard = await cardDAO.getCardByCardId(cardId);
+
+  return {
+    status,
+    roundNumber,
+    playerCards,
+    failedAttempts,
+    cardsWon,
+    currentCard,
   };
 };
 
@@ -141,6 +155,7 @@ const processGuess = async (
   );
   const isCorrect = !isTimeout && position === correctPosition;
 
+  // Salva il round
   await roundDAO.saveRound(currentCard.cardId, roundNumber, isCorrect, gameId);
 
   let updatedHand = [...playerCards];
@@ -155,7 +170,7 @@ const processGuess = async (
     newFailedAttempts++;
   }
 
-  const totalCards = 3 + newCardsWon;
+  const totalCards = newCardsWon;
   let gameStatus = "in_progress";
 
   if (totalCards === 6) {
@@ -179,9 +194,12 @@ const processGuess = async (
       cardsWon: newCardsWon,
       failedAttempts: newFailedAttempts,
       updatedHand,
+      newRoundNumber: roundNumber + 1,
+      nextCard: null,
     };
   }
 
+  // Ottieni la prossima carta sfida
   const nextCard = await cardDAO.getNextCard(gameId);
 
   return {
@@ -193,6 +211,7 @@ const processGuess = async (
     failedAttempts: newFailedAttempts,
     updatedHand,
     nextCard,
+    newRoundNumber: roundNumber + 1,
   };
 };
 
@@ -209,7 +228,7 @@ const findCorrectPosition = (cards, misfortuneIndex) => {
 };
 
 const removeIndex = (card) => ({
-  id: card.cardId,
+  cardId: card.cardId,
   name: card.name,
   imageUrl: card.imageUrl,
 });
