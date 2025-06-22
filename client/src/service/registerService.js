@@ -1,3 +1,6 @@
+/**
+ * Consente di effettuare alcuni semplici controlli sui dati inseriti dall'utente in fase di Registrazione
+ */
 export const checkInput = (username, passwordFirst, passwordSecond) => {
   if (!username || !passwordFirst || !passwordSecond) {
     throw new Error("Compila tutti i campi");

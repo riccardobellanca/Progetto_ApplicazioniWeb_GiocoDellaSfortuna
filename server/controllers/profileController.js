@@ -3,6 +3,9 @@ import { getAllGamesByUserId } from "../dao/GameDAO.js";
 import { getAllRoundsByGameId } from "../dao/RoundDAO.js";
 import { getCardByCardId } from "../dao/CardDAO.js";
 
+/**
+ * Consente di ricavare tutte le informazioni di un singolo utente
+ */
 export const getProfileInfo = async (profileId) => {
   try {
     const users = await getUserById(parseInt(profileId));
@@ -52,6 +55,9 @@ export const getProfileInfo = async (profileId) => {
   }
 };
 
+/**
+ * Consente di ricavare l'intera cronologia delle partite di un singolo utente
+ */
 export const getProfileHistory = async (userId) => {
   try {
     const completedGames = await getAllGamesByUserId(userId);

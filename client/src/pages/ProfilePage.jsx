@@ -16,6 +16,7 @@ import {
 import { API } from "../API.mjs";
 import { useToast } from "../contexts/ToastContext";
 import NavBar from "../components/NavBar";
+import { ApiError } from "../API.mjs";
 
 function ProfilePage() {
   const { profileId } = useParams();
@@ -130,13 +131,6 @@ function ProfilePage() {
     if (rate >= 70) return "#22c55e";
     if (rate >= 50) return "#f59e0b";
     return "#ef4444";
-  };
-
-  const getMisfortuneColor = (index) => {
-    if (index >= 8) return "danger";
-    if (index >= 6) return "warning";
-    if (index >= 4) return "info";
-    return "success";
   };
 
   const winRate = parseFloat(profileData.winRate);
@@ -361,7 +355,7 @@ function ProfilePage() {
                                   bg={
                                     game.status === "won"
                                       ? "success"
-                                      : "secondary"
+                                      : "danger"
                                   }
                                   className="mb-1"
                                 >
@@ -371,7 +365,7 @@ function ProfilePage() {
                                 <small className="text-muted">
                                   <span className="text-success me-2">
                                     <i className="bi bi-trophy"></i>{" "}
-                                    {game.totalCardsWon}
+                                    {game.totalCardsWon-3}
                                   </span>
                                   <span className="text-danger">
                                     <i className="bi bi-x-circle"></i>{" "}

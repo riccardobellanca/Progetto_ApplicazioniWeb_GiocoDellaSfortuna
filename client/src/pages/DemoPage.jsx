@@ -30,9 +30,13 @@ function DemoGamePage() {
   const navigate = useNavigate();
   const timerRef = useRef(null);
   const gameIdRef = useRef(null);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
-    startNewDemo();
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      startNewDemo();
+    }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -97,7 +101,7 @@ function DemoGamePage() {
     try {
       setSubmitting(true);
       setIsTimeout(true);
-      const result = await API.submitDemoGuess(currentGameId, -1);
+      const result = await API.submitDemoGuess(-1);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nel processare il timeout");
@@ -120,7 +124,7 @@ function DemoGamePage() {
     try {
       setSubmitting(true);
       setIsTimeout(false);
-      const result = await API.submitDemoGuess(currentGameId, selectedPosition);
+      const result = await API.submitDemoGuess(selectedPosition);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nell'invio della risposta");

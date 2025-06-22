@@ -11,7 +11,7 @@ const router = Router();
 const validateProfileId = [
   param("profileId")
     .isInt({ min: 1 })
-    .withMessage("Profile ID deve essere un numero valido")
+    .withMessage("Profile ID deve essere un numero intero valido.")
 ];
 
 router.get("/:profileId", 

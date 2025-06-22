@@ -1,13 +1,13 @@
 import db from "../db/database.js";
 
 /**
- * Crea nuova partita
+ * Crea una nuova partita
  */
 export async function saveGame(userId) {
   return new Promise((resolve, reject) => {
     const sql = `
      INSERT INTO partite (userId, status, createdAt, totalCardsWon, totalCardsLost) 
-     VALUES (?, ?, datetime('now'), ?, ?)
+     VALUES (?, ?, datetime('now', 'localtime'), ?, ?)
    `;
 
     db.run(sql, [userId, "in_progress", 0, 0], function(err) {
@@ -29,13 +29,13 @@ export async function saveGame(userId) {
 }
 
 /**
- * Aggiorna stato partita
+ * Aggiorna lo stato finale di una partita
  */
 export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
   return new Promise((resolve, reject) => {
     const sql = `
      UPDATE partite 
-     SET status = ?, totalCardsWon = ?, totalCardsLost = ?, createdAt = datetime('now')
+     SET status = ?, totalCardsWon = ?, totalCardsLost = ?
      WHERE gameId = ?
    `;
 
@@ -48,7 +48,7 @@ export async function updateGameStatus(gameId, status, cardsWon, cardsLost) {
 }
 
 /**
- * Cerca tutte le partite giocate da un utente
+ * Cerca tutte le partite giocate da uno specifico utente
  */
 export async function getAllGamesByUserId(userId) {
   return new Promise((resolve, reject) => {

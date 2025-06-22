@@ -8,10 +8,10 @@ const router = Router();
 const validateGuess = [
   body("position")
     .notEmpty()
-    .withMessage("Position è richiesta")
+    .withMessage("Position è richiesta.")
     .isInt({ min: -1, max: 6 })
     .withMessage(
-      "Position deve essere un intero con valore compreso fra -1 e 6"
+      "Position deve essere un intero con valore compreso fra -1 e 6."
     ),
 ];
 

@@ -1,16 +1,19 @@
-import React, { useState, createContext, useContext, useEffect } from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, createContext, useContext, useEffect } from "react";
+import { CheckCircle, XCircle } from "lucide-react";
 
 const ToastContext = createContext();
 
 export const useToast = () => {
   const context = useContext(ToastContext);
   if (!context) {
-    throw new Error('useToast deve essere usato dentro ToastProvider');
+    throw new Error("useToast deve essere usato dentro ToastProvider");
   }
   return context;
 };
 
+/**
+ * Consente di restituire a schermo un messaggio pop-up utile all'utente, migliorando la sua esperienza all'interno dell'applicazione
+ */
 const Toast = ({ id, type, title, message, onRemove }) => {
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -19,22 +22,22 @@ const Toast = ({ id, type, title, message, onRemove }) => {
     return () => clearTimeout(timer);
   }, [id, onRemove]);
 
-  const isSuccess = type === 'success';
-  
+  const isSuccess = type === "success";
+
   return (
     <>
-      <div 
+      <div
         className={`
           toast-notification
           position-fixed bottom-0 end-0 p-4 rounded shadow-lg
           d-flex align-items-center gap-3
-          ${isSuccess ? 'bg-success' : 'bg-danger'} text-white
+          ${isSuccess ? "bg-success" : "bg-danger"} text-white
         `}
-        style={{ 
+        style={{
           zIndex: 1050,
-          minWidth: '320px',
-          maxWidth: '400px',
-          margin: '1rem'
+          minWidth: "320px",
+          maxWidth: "400px",
+          margin: "1rem",
         }}
       >
         {isSuccess ? (
@@ -42,15 +45,16 @@ const Toast = ({ id, type, title, message, onRemove }) => {
         ) : (
           <XCircle className="flex-shrink-0" size={24} />
         )}
-        
+
         <div className="flex-grow-1">
           <div className="fw-semibold small mb-1">{title}</div>
           <div className="small opacity-75">{message}</div>
         </div>
       </div>
-      
-      <style dangerouslySetInnerHTML={{
-        __html: `
+
+      <style
+        dangerouslySetInnerHTML={{
+          __html: `
           @keyframes slideInRight {
             from { 
               transform: translateX(100%); 
@@ -65,8 +69,9 @@ const Toast = ({ id, type, title, message, onRemove }) => {
           .toast-notification {
             animation: slideInRight 0.3s ease-out;
           }
-        `
-      }} />
+        `,
+        }}
+      />
     </>
   );
 };
@@ -74,20 +79,24 @@ const Toast = ({ id, type, title, message, onRemove }) => {
 const ToastProvider = ({ children }) => {
   const [toast, setToast] = useState(null);
 
-  const showSuccess = (message = '') => {
-    setToast({ id: Date.now(), type: 'success', title : "Successo", message });
+  /**
+   * Utile per restituire un messaggio di successo intuitivo per l'utente
+   */
+  const showSuccess = (message = "") => {
+    setToast({ id: Date.now(), type: "success", title: "Successo", message });
   };
 
-  const showError = (message = '') => {
-    setToast({ id: Date.now(), type: 'error', title : "Errore", message });
+  /**
+   * Utile per restituire un messaggio di errore intuitivo per l'utente
+   */
+  const showError = (message = "") => {
+    setToast({ id: Date.now(), type: "error", title: "Errore", message });
   };
 
   return (
     <ToastContext.Provider value={{ showSuccess, showError }}>
       {children}
-      {toast && (
-        <Toast {...toast} onRemove={() => setToast(null)} />
-      )}
+      {toast && <Toast {...toast} onRemove={() => setToast(null)} />}
     </ToastContext.Provider>
   );
 };

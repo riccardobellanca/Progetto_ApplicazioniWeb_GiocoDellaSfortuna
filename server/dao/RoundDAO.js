@@ -2,13 +2,13 @@ import db from "../db/database.js";
 import { Round } from "../entities/Round.js";
 
 /**
-* Salva un round di gioco
+* Salva un round di una partita
 */
 export async function saveRound(cardId, roundNumber, isWon, gameId) {
  return new Promise((resolve, reject) => {
    const sql = `
      INSERT INTO rounds (gameId, cardId, roundNumber, isWon, playedAt) 
-     VALUES (?, ?, ?, ?, datetime('now'))
+     VALUES (?, ?, ?, ?, datetime('now','localtime'))
    `;
    
    db.run(sql, [gameId, cardId, roundNumber, isWon], function(err) {
@@ -29,7 +29,7 @@ export async function saveRound(cardId, roundNumber, isWon, gameId) {
 }
 
 /**
- * Cerca tutte le carte incontrate durante una partita
+ * Restituisce tutte le informazioni di tutti i round di una singola partita
  */
 export function getAllRoundsByGameId(gameId) {
   return new Promise((resolve,reject) => {
@@ -42,7 +42,7 @@ export function getAllRoundsByGameId(gameId) {
 }
 
 /**
- * Cerca tutte le carte incontrate durante una partita
+ * Restituisce gli identificativi di tutte le carte incontrate durante una singola partita
  */
 export function getAllCardSeenIds(gameId) {
   return new Promise((resolve,reject) => {

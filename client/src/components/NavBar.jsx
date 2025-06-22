@@ -3,18 +3,14 @@ import { Link, useNavigate } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useToast } from "../contexts/ToastContext";
 import { API } from "../API.mjs";
-import { useEffect } from "react";
 
+/**
+ * Consente di restituire una barra di navigazione, utile all'utente per poter navigare all'interno dell'applicazione
+ */
 function NavBar() {
-  const { user, logout, checkSession } = useUser();
+  const { user, logout } = useUser();
   const { showSuccess, showError } = useToast();
   const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      checkSession;
-    }
-  }, []);
 
   const handleLogout = async () => {
     try {

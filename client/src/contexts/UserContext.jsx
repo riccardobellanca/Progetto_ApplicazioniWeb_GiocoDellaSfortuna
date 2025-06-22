@@ -4,6 +4,9 @@ import { API } from "../API.mjs";
 const UserContext = createContext(null);
 export const useUser = () => useContext(UserContext);
 
+/**
+ * Consente di salvare in localStorage e utilizzare all'interno dell'applicazione alcune informazioni dell'utente
+ */
 export const UserProvider = ({ children }) => {
   const [user, setUser] = useState(null);
 
@@ -22,23 +25,6 @@ export const UserProvider = ({ children }) => {
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
-  const checkSession = async () => {
-    try {
-      setLoading(true);
-      if (user) {
-        const sessionValid = await API.checkSession();
-        if (!sessionValid) {
-          logout();
-        };
-      }
-    } catch (error) {
-      console.error("Errore verifica sessione:", error);
-      logout();
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const login = (userData) => {
     setUser(userData);
     localStorage.setItem("user", JSON.stringify(userData));
@@ -50,7 +36,13 @@ export const UserProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, login, logout }}>
+    <UserContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+      }}
+    >
       {children}
     </UserContext.Provider>
   );

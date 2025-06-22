@@ -3,6 +3,10 @@ import { Link } from "react-router-dom";
 import { useUser } from "../contexts/UserContext";
 import { useNavigate } from "react-router-dom";
 
+/**
+ * Restituisce una sezione della pagina Home, utile per consentire agli utenti autenticati di giocare e visitare il proprio profilo
+ * e agli utenti non autenticati di potersi registrare o provare a giocare una demo
+ */
 function IntroSection() {
   const { user } = useUser();
   const navigate = useNavigate();

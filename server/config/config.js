@@ -1,3 +1,6 @@
+/**
+ * Consente di impostare alcuni valori di configurazione dell'applicazione
+ */
 export const CONFIG = {
   SERVER_PORT: 5000,
   REACT_SERVER_PORT: 5173,

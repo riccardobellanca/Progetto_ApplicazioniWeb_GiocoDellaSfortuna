@@ -1,5 +1,8 @@
 import { Row, Col, Card } from 'react-bootstrap';
 
+/**
+ * Restituisce una sommario delle regole e dell'obiettivo del gioco
+ */
 function GameRules() {
   const rules = [
     {

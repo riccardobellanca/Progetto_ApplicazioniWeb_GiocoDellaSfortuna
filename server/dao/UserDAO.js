@@ -2,7 +2,7 @@ import db from "../db/database.js";
 import crypto from "crypto";
 
 /**
- * Crea nuovo utente con password hashata
+ * Crea un nuovo utente
  */
 export async function createUser(username, password) {
   const salt = crypto.randomBytes(16).toString("hex");
@@ -30,7 +30,7 @@ export async function rejectIfFindUserByUsername(username) {
     const sql = "SELECT * FROM utenti WHERE username = ?";
     db.get(sql, [username], (err, row) => {
       if (err)
-        reject({ code: 500, message: "Errore nella verifica dell'utente" });
+        reject({ code: err.code, message: err.message });
       else if (row)
         reject({
           code: 409,
@@ -42,7 +42,7 @@ export async function rejectIfFindUserByUsername(username) {
 }
 
 /**
- * Verifica credenziali utente
+ * Restituisce le informazioni fondamentali di un utente sulla base del suo username e della sua password
  */
 export async function getUserByCredentials(username, password) {
   return new Promise((resolve, reject) => {
@@ -51,8 +51,8 @@ export async function getUserByCredentials(username, password) {
     db.get(sql, [username], (err, row) => {
       if (err)
         return reject({
-          code: 500,
-          message: "Impossibile trovare l'utente con queste credenziali",
+          code: err.code,
+          message: err.message,
         });
       if (!row) return resolve(null);
       const hash = crypto
@@ -65,7 +65,7 @@ export async function getUserByCredentials(username, password) {
 }
 
 /**
- * Verifica credenziali utente
+ * Restituisce un utente sulla base del suo identificativo
  */
 export async function getUserById(userId) {
   return new Promise((resolve, reject) => {
@@ -74,7 +74,7 @@ export async function getUserById(userId) {
     db.all(sql, [userId], (err, row) => {
       if (err)
         return reject({
-          code: 500,
+          code: err.code,
           message: err.message,
         });
       resolve(row);

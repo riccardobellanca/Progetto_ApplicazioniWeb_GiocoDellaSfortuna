@@ -2,11 +2,15 @@ import * as gameDAO from "../dao/GameDAO.js";
 import * as cardDAO from "../dao/CardDAO.js";
 import * as roundDAO from "../dao/RoundDAO.js";
 
+/**
+ * Consente di iniziare la partita e restituirne i dati essenziali 
+ */
 export const createGame = async (req) => {
   try {
     const gameData = await startNewGame(req.user.userId);
     req.session.gameId = gameData.gameId;
     req.session.cardId = gameData.challengeCard.cardId;
+    req.session.startTime = Date.now();
 
     return {
       success: true,
@@ -31,6 +35,9 @@ export const createGame = async (req) => {
   }
 };
 
+/**
+ * Consente di creare lo stato di gioco e restituire tutte le informazioni necessarie al Game 
+ */
 const startNewGame = async (userId) => {
   const game = await gameDAO.saveGame(userId);
   const cards = await cardDAO.getAllCards();
@@ -52,16 +59,21 @@ const startNewGame = async (userId) => {
   };
 };
 
+/**
+ * Consente di ricevere una risposta sulla correttezza del tentativo effettuato dall'utente
+ */
 export const submitGuess = async (req) => {
   try {
     const { position } = req.body;
     const gameId = req.session.gameId;
     let cardId = req.session.cardId;
 
-    // Recupera lo stato corrente del gioco dal database
     const gameState = await getGameState(gameId, cardId);
 
-    let isTimeout = position === -1;
+    let isTimeout =
+      position === -1 ||
+      (req.session.startTime !== undefined &&
+        Date.now() - req.session.startTime > 30000);
 
     const result = await processGuess(
       gameId,
@@ -88,7 +100,10 @@ export const submitGuess = async (req) => {
         round: result.newRoundNumber,
         cardsWon: result.cardsWon,
         cardsLost: result.failedAttempts,
-        hand: !isTimeout && result.isCorrect? result.updatedHand : gameState.playerCards,
+        hand:
+          !isTimeout && result.isCorrect
+            ? result.updatedHand
+            : gameState.playerCards,
         nextChallengeCard: nextChallengeCard,
       },
     };
@@ -104,29 +119,24 @@ export const submitGuess = async (req) => {
   }
 };
 
+/**
+ * Consente di determinare lo stato di gioco della partita in corso e restituisce tutte le informazioni di una carta
+ */
 const getGameState = async (gameId, cardId) => {
-  // Trova le info di tutti i round della partita
   const rounds = await roundDAO.getAllRoundsByGameId(gameId);
 
-  // Trova le carte nella mano del giocatore
   const cardIds = rounds.filter((r) => r.isWon).map((r) => r.cardId);
   const playerCards = await Promise.all(
     cardIds.map((cardId) => cardDAO.getCardByCardId(cardId))
   );
   playerCards.sort((a, b) => a.misfortuneIndex - b.misfortuneIndex);
 
-  console.log(
-    "playerCards sorted => " + playerCards.map((card) => card.cardId)
-  );
-
-  // Calcola statistiche dai round
   const roundNumber = rounds.filter((r) => r.roundNumber > 0).length + 1;
   const failedAttempts = rounds.filter((r) => !r.isWon).length;
   const cardsWon = rounds.filter((r) => r.isWon).length;
   const status =
     cardsWon === 6 ? "won" : failedAttempts === 3 ? "lost" : "in_progress";
 
-  // Trova la carta corrente da indovinare
   const currentCard = await cardDAO.getCardByCardId(cardId);
 
   return {
@@ -139,6 +149,9 @@ const getGameState = async (gameId, cardId) => {
   };
 };
 
+/**
+ * Consente di processare un tentativo di gioco
+ */
 const processGuess = async (
   gameId,
   currentCard,
@@ -155,7 +168,6 @@ const processGuess = async (
   );
   const isCorrect = !isTimeout && position === correctPosition;
 
-  // Salva il round
   await roundDAO.saveRound(currentCard.cardId, roundNumber, isCorrect, gameId);
 
   let updatedHand = [...playerCards];
@@ -199,7 +211,6 @@ const processGuess = async (
     };
   }
 
-  // Ottieni la prossima carta sfida
   const nextCard = await cardDAO.getNextCard(gameId);
 
   return {
@@ -215,6 +226,9 @@ const processGuess = async (
   };
 };
 
+/**
+ * Restituisce la posizione corretta di una carta, sulla base del suo misfortuneIndex e delle altre carte in mano 
+ */
 const findCorrectPosition = (cards, misfortuneIndex) => {
   let position = 0;
   for (let i = 0; i < cards.length; i++) {
@@ -227,8 +241,23 @@ const findCorrectPosition = (cards, misfortuneIndex) => {
   return position;
 };
 
+/**
+ * Consente di rimuovere il misfortuneIndex di una carta 
+ */
 const removeIndex = (card) => ({
   cardId: card.cardId,
   name: card.name,
   imageUrl: card.imageUrl,
 });
+
+/**
+ * Consente di inizializzare il timer, necessario per successivi controlli sul timeout 
+ */
+export const startGameTimer = (req) => {
+  const { startTime } = req.body;
+  req.session.startTime = startTime;
+  return {
+    success: true,
+    data: {},
+  };
+};

@@ -1,6 +1,9 @@
 import { Link } from "react-router-dom";
 import { Container, Button } from "react-bootstrap";
 
+/**
+ * Consente di restituire una pagina intuitiva in caso di Not Found Error ed eventualmente reindirizzare l'utente alla Home
+ */
 function NotFoundPage() {
   return (
     <div style={{ backgroundColor: "#f8f5ff", minHeight: "100vh", display: "flex", alignItems: "center" }}>

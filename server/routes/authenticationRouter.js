@@ -12,22 +12,22 @@ const router = Router();
 const validateRegister = [
   body("username")
     .isLength({ min: 4, max: 30 })
-    .withMessage("Username deve essere tra 4 e 30 caratteri")
+    .withMessage("Username deve essere tra 4 e 30 caratteri.")
     .matches(/^[a-zA-Z0-9_]+$/)
-    .withMessage("Username può contenere solo lettere, numeri e underscore"),
+    .withMessage("Lo username può contenere solo lettere, numeri e underscore."),
 
   body("password")
     .isLength({ min: 6 })
-    .withMessage("La password deve essere di almeno 6 caratteri")
-    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/)
+    .withMessage("La password deve essere di almeno 6 caratteri.")
+    .matches(/^[a-zA-Z0-9_]+$/)
     .withMessage(
-      "La password deve contenere almeno una lettera minuscola, una maiuscola e un numero"
+      "La password può contenere solo lettere, numeri e underscore."
     ),
 
   body("confirmPassword")
     .custom((value, { req }) => {
       if (value !== req.body.password) {
-        throw new Error("Le due password non coincidono");
+        throw new Error("Le due password non coincidono.");
       }
       return true;
     })
@@ -36,12 +36,12 @@ const validateRegister = [
 const validateLogin = [
   body("username")
     .notEmpty()
-    .withMessage("Username è richiesto")
+    .withMessage("Lo username è richiesto.")
     .trim(),
 
   body("password")
     .notEmpty()
-    .withMessage("Password è richiesta")
+    .withMessage("La password è richiesta.")
 ];
 
 router.post("/register", validateRegister, checkValidation, async (req, res) => {
@@ -71,7 +71,6 @@ router.post("/login", validateLogin, checkValidation, async (req, res, next) => 
 });
 
 router.post("/logout", (req, res) => {
-  // Verifica se l'utente è autenticato
   if (!req.user) {
     return res.status(401).json({
       success: false,

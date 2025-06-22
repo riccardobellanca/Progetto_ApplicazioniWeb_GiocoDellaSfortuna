@@ -1,4 +1,6 @@
-
+/**
+ * Consente di effettuare alcuni semplici controlli sui dati inseriti dall'utente in fase di Login
+ */
 export const checkInput = (username, password) => {
   username = username.trim();
   password = password.trim();

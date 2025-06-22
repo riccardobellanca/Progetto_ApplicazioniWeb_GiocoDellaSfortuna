@@ -1,4 +1,3 @@
-// API.mjs
 const SERVER_URL = "http://localhost:5000";
 
 export class ApiError extends Error {
@@ -13,19 +12,6 @@ export class ApiError extends Error {
 }
 
 const handleApiCall = async (url, options = {}) => {
-  
-  /*
-  console.group(`${options.method} ${url}`);
-  console.log("Body:", JSON.stringify(options.body, null, 2));
-  console.log("Headers:", {
-    "Content-Type": "application/json",
-    credentials: "include",
-    ...options.headers,
-  });
-  console.log("Full Options:", JSON.stringify(options, null, 2));
-  console.groupEnd();
-  */
-
   const response = await fetch(url, {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
@@ -33,7 +19,6 @@ const handleApiCall = async (url, options = {}) => {
   });
 
   const responseJson = await response.json();
-  console.log("responseJson => " + JSON.stringify(responseJson, null, 2));
 
   if (!responseJson.success) {
     throw new ApiError(
@@ -45,6 +30,9 @@ const handleApiCall = async (url, options = {}) => {
   return responseJson.data;
 };
 
+/**
+ * Consente di gestire le chiamate effettuate dal browser ed indirizzate al server
+ */
 export const API = {
   login: async (username, password) => {
     return handleApiCall(SERVER_URL + "/auth/login", {
@@ -84,10 +72,10 @@ export const API = {
     });
   },
 
-  submitGuess: async (gameId, position) => {
+  submitGuess: async (position) => {
     return handleApiCall(SERVER_URL + "/game/guess", {
       method: "POST",
-      body: JSON.stringify({ gameId, position }),
+      body: JSON.stringify({ position }),
     });
   },
 
@@ -103,10 +91,26 @@ export const API = {
     });
   },
 
-  submitDemoGuess: async (gameId, position) => {
+  submitDemoGuess: async (position) => {
     return handleApiCall(SERVER_URL + "/demo/guess", {
       method: "POST",
-      body: JSON.stringify({ gameId, position }),
+      body: JSON.stringify({ position }),
+    });
+  },
+
+  startGameTimer: async () => {
+    const startTime = Date.now();
+    return await handleApiCall(SERVER_URL + "/game/timer", {
+      method: "POST",
+      body: JSON.stringify({ startTime }),
+    });
+  },
+
+  startDemoTimer: async () => {
+    const startTime = Date.now();
+    return await handleApiCall(SERVER_URL + "/demo/timer", {
+      method: "POST",
+      body: JSON.stringify({ startTime }),
     });
   },
 };

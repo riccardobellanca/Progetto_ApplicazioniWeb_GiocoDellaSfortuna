@@ -7,13 +7,13 @@ import {
   Card,
   Button,
   Badge,
-  Alert,
   Spinner,
   Modal,
 } from "react-bootstrap";
 import { API } from "../API.mjs";
 import { useToast } from "../contexts/ToastContext";
 import NavBar from "../components/NavBar";
+import { ApiError } from "../API.mjs";
 
 function GamePage() {
   const [gameData, setGameData] = useState(null);
@@ -31,6 +31,7 @@ function GamePage() {
   const navigate = useNavigate();
   const timerRef = useRef(null);
   const gameIdRef = useRef(null);
+  const isInitialized = useRef(false);
 
   const redirectTo = (statusCode) => {
     if (statusCode === 401) navigate("/unauthorized");
@@ -38,7 +39,10 @@ function GamePage() {
   };
 
   useEffect(() => {
-    startNewGame();
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      startNewGame();
+    }
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
@@ -120,7 +124,7 @@ useEffect(() => {
     try {
       setSubmitting(true);
       setIsTimeout(true);
-      const result = await API.submitGuess(currentGameId, -1);
+      const result = await API.submitGuess(-1);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nel processare il timeout");
@@ -141,7 +145,7 @@ useEffect(() => {
     try {
       setSubmitting(true);
       setIsTimeout(false);
-      const result = await API.submitGuess(currentGameId, selectedPosition);
+      const result = await API.submitGuess(selectedPosition);
       processGuessResult(result);
     } catch (err) {
       showError("Errore nell'invio della risposta");
@@ -175,6 +179,11 @@ useEffect(() => {
     setShowResultModal(false);
 
     if (!gameEnded) {
+      try {
+        API.startGameTimer();
+      } catch (error) {
+        showError("Errore nella partenza del timer");
+      }
       setLastResult(null);
       setIsTimeout(false);
       setSelectedPosition(null);
